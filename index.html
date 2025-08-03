@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prince Alex Academy Grading System</title>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for performance graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML2PDF CDN for report generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8; /* Light gray background */
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+        .btn-primary {
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* Tailwind blue-600 */
+        }
+        .nav-link {
+            color: #4a5568; /* Tailwind gray-700 */
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover {
+            background-color: #f1f5f9; /* Tailwind gray-100 */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0; /* Tailwind gray-200 */
+        }
+        th {
+            background-color: #f8fafc; /* Tailwind gray-50 */
+            font-weight: 600;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0; /* Tailwind gray-200 */
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6; /* Tailwind blue-500 */
+        }
+        /* Styles for the PDF report */
+        .report-container {
+            max-width: 21cm; /* A4 width */
+            margin: auto;
+            background-color: white;
+            padding: 2rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+        .report-header {
+            background-color: #1e3a8a; /* Dark blue */
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .report-header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .report-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .report-header p {
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        .report-footer {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            margin-top: 2rem;
+        }
+        .report-table th, .report-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .report-details {
+            font-size: 1rem;
+            color: #4b5563;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            width: 150px;
+            margin-top: 30px;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800">
+
+    <!-- Main application container -->
+    <div id="app-container" class="container mx-auto p-4 md:p-8"></div>
+
+    <script>
+        // --- Helper Functions and Initial Data Setup ---
+
+        // Get or initialize data from localStorage
+        const getData = (key, defaultValue) => {
+            try {
+                const storedData = localStorage.getItem(key);
+                return storedData ? JSON.parse(storedData) : defaultValue;
+            } catch (e) {
+                console.error(`Error parsing data from localStorage for key: ${key}`, e);
+                return defaultValue;
+            }
+        };
+
+        const setData = (key, data) => {
+            localStorage.setItem(key, JSON.stringify(data));
+        };
+
+        const classes = ['Form 1', 'Form 2', 'Form 3', 'Form 4'];
+
+        // Updated grading scale
+        const getGrade = (mark) => {
+            if (mark >= 90) return 'A';
+            if (mark >= 80) return 'B';
+            if (mark >= 70) return 'C';
+            if (mark >= 60) return 'D';
+            return 'F';
+        };
+
+        // Pre-populate localStorage with some dummy data for a complete experience
+        const initialSetup = () => {
+            // Check if any data exists to avoid overwriting on refresh
+            if (!localStorage.getItem('teachers')) {
+                const dummyTeachers = [
+                    { username: 'john.doe', password: 'password123', name: 'John Doe' },
+                    { username: 'jane.smith', password: 'password123', name: 'Jane Smith' },
+                ];
+                setData('teachers', dummyTeachers);
+            }
+
+            if (!localStorage.getItem('students')) {
+                const dummyStudents = [
+                    { id: 'S001', name: 'Alice Johnson', class: 'Form 1', gender: 'Female' },
+                    { id: 'S002', name: 'Bob Williams', class: 'Form 1', gender: 'Male' },
+                    { id: 'S003', name: 'Charlie Brown', class: 'Form 2', gender: 'Male' },
+                    { id: 'S004', name: 'Diana Miller', class: 'Form 2', gender: 'Female' },
+                    { id: 'S005', name: 'Evan Green', class: 'Form 3', gender: 'Male' },
+                    { id: 'S006', name: 'Fiona White', class: 'Form 3', gender: 'Female' },
+                    { id: 'S007', name: 'George Evans', class: 'Form 4', gender: 'Male' },
+                    { id: 'S008', name: 'Hannah Davis', class: 'Form 4', gender: 'Female' },
+                ];
+                setData('students', dummyStudents);
+            }
+
+            if (!localStorage.getItem('admin')) {
+                const dummyAdmin = { username: 'admin', password: 'adminpass' };
+                setData('admin', dummyAdmin);
+            }
+
+            // Marks data will be added by the teacher
+            if (!localStorage.getItem('marks')) {
+                 const dummyMarks = [
+                    // Term 1, Mid-Term
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'Mid-Term', marks: 85, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'Mid-Term', marks: 78, teacher: 'john.doe' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'Mid-Term', marks: 92, teacher: 'jane.smith' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'Mid-Term', marks: 88, teacher: 'jane.smith' },
+                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 65, teacher: 'john.doe' },
+                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 95, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 1', examType: 'Mid-Term', marks: 70, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 1', examType: 'Mid-Term', marks: 80, teacher: 'jane.smith' },
+                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 1', examType: 'Mid-Term', marks: 90, teacher: 'john.doe' },
+                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 1', examType: 'Mid-Term', marks: 85, teacher: 'jane.smith' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 88, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 82, teacher: 'john.doe' },
+                    // Term 1, End of Term
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'End of Term', marks: 95, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'End of Term', marks: 82, teacher: 'john.doe' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'End of Term', marks: 95, teacher: 'jane.smith' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'End of Term', marks: 90, teacher: 'jane.smith' },
+                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 75, teacher: 'john.doe' },
+                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 98, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 1', examType: 'End of Term', marks: 75, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 1', examType: 'End of Term', marks: 85, teacher: 'jane.smith' },
+                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 1', examType: 'End of Term', marks: 92, teacher: 'john.doe' },
+                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 1', examType: 'End of Term', marks: 88, teacher: 'jane.smith' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 90, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 85, teacher: 'john.doe' },
+                ];
+                setData('marks', dummyMarks);
+            }
+        };
+
+        // --- Core Application Logic ---
+
+        const appContainer = document.getElementById('app-container');
+
+        // Function to handle login
+        const login = (role, credentials) => {
+            let user = null;
+            if (role === 'teacher') {
+                const teachers = getData('teachers', []);
+                // This logic allows any new teacher added by the admin to log in.
+                user = teachers.find(t => t.username === credentials.username && t.password === credentials.password);
+            } else if (role === 'admin') {
+                const admin = getData('admin', {});
+                if (admin.username === credentials.username && admin.password === credentials.password) {
+                    user = { username: admin.username, name: 'Admin', role: 'admin' };
+                }
+            }
+
+            if (user) {
+                setData('session', { username: user.username, name: user.name, role: role });
+                renderPage();
+                return true;
+            } else {
+                alert('Invalid username or password.');
+                return false;
+            }
+        };
+
+        // Function to handle logout
+        const logout = () => {
+            localStorage.removeItem('session');
+            renderPage();
+        };
+
+        // --- Page Rendering Functions ---
+
+        // Render the landing page
+        const renderLandingPage = () => {
+            appContainer.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen">
+                    <div class="card max-w-2xl text-center">
+                        <img src="logo.png" alt="School Logo" class="mx-auto mb-6 w-24 h-24 rounded-full">
+                        <h1 class="text-4xl md:text-5xl font-bold text-blue-600 mb-4">Prince Alex Academy Grading System</h1>
+                        <p class="text-lg md:text-xl text-gray-600 mb-8">
+                            Welcome to the Student Grading Management System. Please choose your role to log in.
+                        </p>
+                        <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <button onclick="renderLoginPage('teacher')" class="btn-primary w-full md:w-auto">Teacher Login</button>
+                            <button onclick="renderLoginPage('admin')" class="btn-primary w-full md:w-auto">Admin Login</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Render the login page for a specific role
+        const renderLoginPage = (role) => {
+            appContainer.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen">
+                    <div class="card max-w-md w-full">
+                        <h2 class="text-3xl font-bold text-center text-blue-600 mb-6">${role === 'teacher' ? 'Teacher' : 'Admin'} Login</h2>
+                        <form id="login-form" class="space-y-4">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700">Username/Email</label>
+                                <input type="text" id="username" name="username" class="mt-1 input-field" required>
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" id="password" name="password" class="mt-1 input-field" required>
+                            </div>
+                            <button type="submit" class="btn-primary w-full">Login</button>
+                        </form>
+                        <p class="mt-4 text-center">
+                            <a href="#" onclick="renderLandingPage()" class="text-blue-500 hover:text-blue-700 font-medium">Back to Home</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = e.target.username.value;
+                const password = e.target.password.value;
+                login(role, { username, password });
+            });
+        };
+
+        // Render the teacher dashboard
+        const renderTeacherDashboard = () => {
+            const session = getData('session', {});
+            appContainer.innerHTML = `
+                <div class="flex flex-col md:flex-row min-h-screen bg-blue-50">
+                    <!-- Sidebar Navigation -->
+                    <aside class="w-full md:w-64 bg-white p-6 shadow-lg rounded-lg md:rounded-r-none md:rounded-l-lg mb-4 md:mb-0">
+                        <div class="flex items-center mb-6">
+                            <img src="logo.png" alt="School Logo" class="w-10 h-10 rounded-full mr-3">
+                            <span class="text-xl font-bold text-blue-600">PAAGS</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Teacher Menu</h3>
+                        <nav class="space-y-2">
+                            <a href="#" onclick="renderTeacherDashboard()" class="block nav-link bg-blue-100 text-blue-700 font-semibold">Dashboard</a>
+                            <a href="#" onclick="renderEnterMarksPage()" class="block nav-link">Enter Marks</a>
+                            <a href="#" onclick="renderViewEditMarksPage()" class="block nav-link">View/Edit Marks</a>
+                            <a href="#" onclick="renderStudentPerformancePage()" class="block nav-link">Student Performance</a>
+                            <a href="#" onclick="renderAddStudentPage()" class="block nav-link">Add Student</a>
+                            <a href="#" onclick="renderGenerateReportsPage()" class="block nav-link">Generate Reports</a>
+                        </nav>
+                        <div class="mt-8">
+                             <button onclick="logout()" class="btn-primary w-full text-center">Logout</button>
+                        </div>
+                    </aside>
+                    <!-- Main Content -->
+                    <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
+                        <div id="teacher-content">
+                            <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, ${session.name}!</h2>
+                            <p class="text-gray-600 mb-6">This is your teacher dashboard. Use the navigation to manage student grades.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div class="card bg-blue-50">
+                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Enter Marks</h3>
+                                    <p class="text-gray-600">Add new marks for your students.</p>
+                                    <button onclick="renderEnterMarksPage()" class="btn-primary mt-4">Go to Page</button>
+                                </div>
+                                <div class="card bg-blue-50">
+                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">View & Edit Marks</h3>
+                                    <p class="text-gray-600">Review and modify existing grades.</p>
+                                    <button onclick="renderViewEditMarksPage()" class="btn-primary mt-4">Go to Page</button>
+                                </div>
+                                <div class="card bg-blue-50">
+                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Add Student</h3>
+                                    <p class="text-gray-600">Add new students to the system.</p>
+                                    <button onclick="renderAddStudentPage()" class="btn-primary mt-4">Go to Page</button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            `;
+        };
+        
+        const renderAddStudentPage = () => {
+            const contentDiv = document.getElementById('teacher-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Add New Student</h2>
+                    <form id="add-student-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="student-id" class="block text-sm font-medium text-gray-700">Admission No.</label>
+                                <input type="text" id="student-id" placeholder="e.g., S009" class="input-field mt-1" required>
+                            </div>
+                            <div>
+                                <label for="student-name" class="block text-sm font-medium text-gray-700">Student Name</label>
+                                <input type="text" id="student-name" placeholder="e.g., Peter Jones" class="input-field mt-1" required>
+                            </div>
+                            <div>
+                                <label for="student-class" class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="student-class" class="input-field mt-1" required>
+                                    <option value="">Select Class</option>
+                                    ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="student-gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                                <select id="student-gender" class="input-field mt-1" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary w-full md:w-auto">Add Student</button>
+                    </form>
+                `;
+                 document.getElementById('add-student-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    addStudent();
+                });
+            }
+        };
+
+        // Centralized function to add a new student
+        const addStudent = (redirect = true) => {
+            const id = document.getElementById('student-id').value;
+            const name = document.getElementById('student-name').value;
+            const studentClass = document.getElementById('student-class').value;
+            const gender = document.getElementById('student-gender').value;
+
+            if (!id || !name || !studentClass || !gender) {
+                alert('Please fill in all the student details.');
+                return;
+            }
+
+            const allStudents = getData('students', []);
+            const newStudent = { id, name, class: studentClass, gender };
+
+            if (allStudents.some(s => s.id === id)) {
+                alert('A student with this Admission No. already exists.');
+                return;
+            }
+
+            setData('students', [...allStudents, newStudent]);
+            alert('Student added successfully!');
+            if (redirect) {
+                renderPage(); // Reloads to the correct dashboard and shows the updated list
+            }
+        };
+
+        window.deleteStudent = (index) => {
+            if (confirm('Are you sure you want to delete this student? All their marks will be lost.')) {
+                let allStudents = getData('students', []);
+                const deletedStudentId = allStudents[index].id;
+                allStudents.splice(index, 1);
+                setData('students', allStudents);
+                // Also delete marks associated with this student
+                let allMarks = getData('marks', []);
+                const remainingMarks = allMarks.filter(mark => mark.studentId !== deletedStudentId);
+                setData('marks', remainingMarks);
+                alert('Student and their marks deleted successfully!');
+                renderManageStudentsPage();
+            }
+        };
+
+        const renderEnterMarksPage = () => {
+            const students = getData('students', []);
+            const subjects = [
+                'Mathematics', 'English Language', 'Kiswahili', 'Physics', 'Chemistry', 'Biology',
+                'History', 'Geography', 'Religious Education (CRE)', 'Business Studies', 'Agriculture',
+                'Home Science', 'Art and Design', 'Computer Studies', 'French', 'German', 'Music', 'Physical Education'
+            ];
+            const terms = ['Term 1', 'Term 2', 'Term 3'];
+            const examTypes = ['Mid-Term', 'End of Term'];
+            const contentDiv = document.getElementById('teacher-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Enter Marks</h2>
+                    <form id="enter-marks-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label for="class-select" class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="class-select" class="mt-1 input-field">
+                                    <option value="">Select Class</option>
+                                    ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subject-select" class="block text-sm font-medium text-gray-700">Subject</label>
+                                <select id="subject-select" class="mt-1 input-field">
+                                    <option value="">Select Subject</option>
+                                    ${subjects.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="term-select" class="block text-sm font-medium text-gray-700">Term</label>
+                                <select id="term-select" class="mt-1 input-field">
+                                    <option value="">Select Term</option>
+                                    ${terms.map(t => `<option value="${t}">${t}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="exam-type-select" class="block text-sm font-medium text-gray-700">Exam Type</label>
+                                <select id="exam-type-select" class="mt-1 input-field">
+                                    <option value="">Select Exam Type</option>
+                                    ${examTypes.map(e => `<option value="${e}">${e}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div id="marks-table-container" class="mt-6 hidden">
+                            <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adm No.</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="marks-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Student rows will be injected here -->
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn-primary mt-6">Save Marks</button>
+                        </div>
+                    </form>
+                `;
+                // Add event listeners for dynamic content
+                const classSelect = document.getElementById('class-select');
+                const marksTableContainer = document.getElementById('marks-table-container');
+                const marksTableBody = document.getElementById('marks-table-body');
+
+                classSelect.addEventListener('change', () => {
+                    const selectedClass = classSelect.value;
+                    if (selectedClass) {
+                        const classStudents = students.filter(s => s.class === selectedClass);
+                        marksTableBody.innerHTML = classStudents.map(s => `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">${s.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${s.id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" min="0" max="100" data-student-id="${s.id}" class="input-field" required>
+                                </td>
+                            </tr>
+                        `).join('');
+                        marksTableContainer.classList.remove('hidden');
+                    } else {
+                        marksTableContainer.classList.add('hidden');
+                    }
+                });
+
+                document.getElementById('enter-marks-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    saveMarks();
+                });
+            }
+        };
+
+        const saveMarks = () => {
+            const form = document.getElementById('enter-marks-form');
+            const selectedClass = form['class-select'].value;
+            const selectedSubject = form['subject-select'].value;
+            const selectedTerm = form['term-select'].value;
+            const selectedExamType = form['exam-type-select'].value;
+            const teacher = getData('session', {}).username;
+
+            if (!selectedClass || !selectedSubject || !selectedTerm || !selectedExamType) {
+                alert('Please select a class, subject, term, and exam type.');
+                return;
+            }
+
+            const marksInputs = document.querySelectorAll('#marks-table-body input[type="number"]');
+            const allMarks = getData('marks', []);
+            const allStudents = getData('students', []);
+            const newMarks = [];
+
+            marksInputs.forEach(input => {
+                const studentId = input.dataset.studentId;
+                const marks = input.value;
+                if (marks) {
+                    const student = allStudents.find(s => s.id === studentId);
+                    newMarks.push({
+                        studentId: studentId,
+                        studentName: student ? student.name : 'Unknown',
+                        class: selectedClass,
+                        subject: selectedSubject,
+                        term: selectedTerm,
+                        examType: selectedExamType,
+                        marks: parseInt(marks, 10),
+                        teacher: teacher
+                    });
+                }
+            });
+
+            // Filter out existing marks for the same criteria
+            const filteredMarks = allMarks.filter(mark =>
+                !(mark.class === selectedClass &&
+                mark.subject === selectedSubject &&
+                mark.term === selectedTerm &&
+                mark.examType === selectedExamType)
+            );
+
+            setData('marks', [...filteredMarks, ...newMarks]);
+            alert('Marks saved successfully!');
+            renderPage();
+        };
+
+        const renderViewEditMarksPage = () => {
+            const students = getData('students', []);
+            const marks = getData('marks', []);
+            const subjects = [...new Set(marks.map(m => m.subject))];
+            const terms = [...new Set(marks.map(m => m.term))];
+            const examTypes = [...new Set(marks.map(m => m.examType))];
+
+            const contentDiv = document.getElementById('teacher-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">View/Edit Marks</h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label for="class-filter" class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="class-filter" class="mt-1 input-field">
+                                    <option value="">All Classes</option>
+                                    ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subject-filter" class="block text-sm font-medium text-gray-700">Subject</label>
+                                <select id="subject-filter" class="mt-1 input-field">
+                                    <option value="">All Subjects</option>
+                                    ${subjects.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="term-filter" class="block text-sm font-medium text-gray-700">Term</label>
+                                <select id="term-filter" class="mt-1 input-field">
+                                    <option value="">All Terms</option>
+                                    ${terms.map(t => `<option value="${t}">${t}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="exam-type-filter" class="block text-sm font-medium text-gray-700">Exam Type</label>
+                                <select id="exam-type-filter" class="mt-1 input-field">
+                                    <option value="">All Exam Types</option>
+                                    ${examTypes.map(e => `<option value="${e}">${e}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="marks-list-container" class="mt-6">
+                            <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="marks-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Filtered marks will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                const marksTableBody = document.getElementById('marks-table-body');
+                const filters = {
+                    class: document.getElementById('class-filter'),
+                    subject: document.getElementById('subject-filter'),
+                    term: document.getElementById('term-filter'),
+                    examType: document.getElementById('exam-type-filter')
+                };
+
+                const applyFilters = () => {
+                    let filteredMarks = marks;
+                    if (filters.class.value) {
+                        filteredMarks = filteredMarks.filter(m => m.class === filters.class.value);
+                    }
+                    if (filters.subject.value) {
+                        filteredMarks = filteredMarks.filter(m => m.subject === filters.subject.value);
+                    }
+                    if (filters.term.value) {
+                        filteredMarks = filteredMarks.filter(m => m.term === filters.term.value);
+                    }
+                    if (filters.examType.value) {
+                        filteredMarks = filteredMarks.filter(m => m.examType === filters.examType.value);
+                    }
+
+                    marksTableBody.innerHTML = filteredMarks.map((m, index) => `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.studentName}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.class}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.subject}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.term}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.examType}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.marks}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button onclick="editMark(${index})" class="text-blue-600 hover:text-blue-900 font-semibold mr-2">Edit</button>
+                                <button onclick="deleteMark(${index})" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                };
+
+                // Attach event listeners for filters
+                Object.values(filters).forEach(filter => {
+                    filter.addEventListener('change', applyFilters);
+                });
+
+                window.editMark = (index) => {
+                    const filteredMarks = marks.filter(m =>
+                        (filters.class.value === '' || m.class === filters.class.value) &&
+                        (filters.subject.value === '' || m.subject === filters.subject.value) &&
+                        (filters.term.value === '' || m.term === filters.term.value) &&
+                        (filters.examType.value === '' || m.examType === filters.examType.value)
+                    );
+                    const markToEdit = filteredMarks[index];
+
+                    // Find the actual index in the main 'marks' array
+                    const originalIndex = marks.findIndex(m =>
+                        m.studentId === markToEdit.studentId &&
+                        m.subject === markToEdit.subject &&
+                        m.term === markToEdit.term &&
+                        m.examType === markToEdit.examType
+                    );
+
+                    const newMark = prompt(`Enter new mark for ${markToEdit.studentName} in ${markToEdit.subject}:`, markToEdit.marks);
+                    if (newMark !== null && !isNaN(newMark) && newMark >= 0 && newMark <= 100) {
+                        marks[originalIndex].marks = parseInt(newMark, 10);
+                        setData('marks', marks);
+                        alert('Mark updated successfully!');
+                        applyFilters(); // Re-render the filtered list
+                    } else if (newMark !== null) {
+                        alert('Invalid input. Please enter a number between 0 and 100.');
+                    }
+                };
+
+                window.deleteMark = (index) => {
+                    if (confirm('Are you sure you want to delete this mark?')) {
+                        const filteredMarks = marks.filter(m =>
+                            (filters.class.value === '' || m.class === filters.class.value) &&
+                            (filters.subject.value === '' || m.subject === filters.subject.value) &&
+                            (filters.term.value === '' || m.term === filters.term.value) &&
+                            (filters.examType.value === '' || m.examType === filters.examType.value)
+                        );
+                        const markToDelete = filteredMarks[index];
+
+                        const originalIndex = marks.findIndex(m =>
+                            m.studentId === markToDelete.studentId &&
+                            m.subject === markToDelete.subject &&
+                            m.term === markToDelete.term &&
+                            m.examType === markToDelete.examType
+                        );
+
+                        if (originalIndex !== -1) {
+                            marks.splice(originalIndex, 1);
+                            setData('marks', marks);
+                            alert('Mark deleted successfully!');
+                            applyFilters();
+                        }
+                    }
+                };
+
+                // Initial render of the table
+                applyFilters();
+            }
+        };
+        
+        const renderStudentPerformancePage = () => {
+            const students = getData('students', []);
+            const contentDiv = document.getElementById('teacher-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Student Performance</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="student-select-performance" class="block text-sm font-medium text-gray-700">Select Student</label>
+                            <select id="student-select-performance" class="mt-1 input-field">
+                                <option value="">Select a student...</option>
+                                ${students.map(s => `<option value="${s.id}">${s.name} (${s.class})</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                             <label for="term-select-performance" class="block text-sm font-medium text-gray-700">Select Term</label>
+                             <select id="term-select-performance" class="mt-1 input-field">
+                                <option value="">Select a term...</option>
+                                <option value="Term 1">Term 1</option>
+                                <option value="Term 2">Term 2</option>
+                                <option value="Term 3">Term 3</option>
+                             </select>
+                        </div>
+                    </div>
+                    <div id="performance-chart-container" class="mt-6 hidden">
+                        <h3 class="text-2xl font-semibold mb-4">Performance Graph</h3>
+                        <canvas id="performanceChart" class="bg-gray-50 p-4 rounded-lg shadow-inner"></canvas>
+                        <h3 class="text-2xl font-semibold mt-8 mb-4">Subject Breakdown</h3>
+                        <div id="subject-breakdown" class="space-y-4"></div>
+                    </div>
+                `;
+
+                const studentSelect = document.getElementById('student-select-performance');
+                const termSelect = document.getElementById('term-select-performance');
+                let performanceChart;
+
+                const updatePerformance = () => {
+                    const studentId = studentSelect.value;
+                    const term = termSelect.value;
+                    const chartContainer = document.getElementById('performance-chart-container');
+                    const subjectBreakdownDiv = document.getElementById('subject-breakdown');
+
+                    if (!studentId || !term) {
+                        chartContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    const allMarks = getData('marks', []);
+                    const studentMarks = allMarks.filter(m => m.studentId === studentId && m.term === term);
+                    const subjects = studentMarks.map(m => m.subject);
+                    const marks = studentMarks.map(m => m.marks);
+                    const grades = studentMarks.map(m => getGrade(m.marks));
+
+                    if (studentMarks.length === 0) {
+                        chartContainer.classList.add('hidden');
+                        subjectBreakdownDiv.innerHTML = '<p class="text-center text-gray-500">No marks found for this student and term.</p>';
+                        return;
+                    }
+                    
+                    chartContainer.classList.remove('hidden');
+
+                    if (performanceChart) {
+                        performanceChart.destroy();
+                    }
+
+                    const ctx = document.getElementById('performanceChart').getContext('2d');
+                    performanceChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: subjects,
+                            datasets: [{
+                                label: `Marks for ${term}`,
+                                data: marks,
+                                backgroundColor: 'rgba(59, 130, 246, 0.5)', // blue-500 with opacity
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Marks (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    subjectBreakdownDiv.innerHTML = studentMarks.map(m => `
+                        <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
+                            <h4 class="font-semibold text-lg">${m.subject}</h4>
+                            <p>Marks: <span class="font-bold">${m.marks}</span></p>
+                            <p>Grade: <span class="font-bold text-blue-600">${getGrade(m.marks)}</span></p>
+                            <p>Exam Type: <span class="font-bold">${m.examType}</span></p>
+                        </div>
+                    `).join('');
+                };
+
+                studentSelect.addEventListener('change', updatePerformance);
+                termSelect.addEventListener('change', updatePerformance);
+            }
+        };
+
+        const renderAdminDashboard = () => {
+            appContainer.innerHTML = `
+                <div class="flex flex-col md:flex-row min-h-screen bg-blue-50">
+                    <!-- Sidebar Navigation -->
+                    <aside class="w-full md:w-64 bg-white p-6 shadow-lg rounded-lg md:rounded-r-none md:rounded-l-lg mb-4 md:mb-0">
+                        <div class="flex items-center mb-6">
+                            <img src="logo.png" alt="School Logo" class="w-10 h-10 rounded-full mr-3">
+                            <span class="text-xl font-bold text-blue-600">PAAGS</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Admin Menu</h3>
+                        <nav class="space-y-2">
+                            <a href="#" onclick="renderAdminDashboard()" class="block nav-link bg-blue-100 text-blue-700 font-semibold">Dashboard</a>
+                            <a href="#" onclick="renderManageTeachersPage()" class="block nav-link">Manage Teachers</a>
+                            <a href="#" onclick="renderManageStudentsPage()" class="block nav-link">Manage Students</a>
+                        </nav>
+                        <div class="mt-8">
+                             <button onclick="logout()" class="btn-primary w-full text-center">Logout</button>
+                        </div>
+                    </aside>
+                    <!-- Main Content -->
+                    <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
+                        <div id="admin-content">
+                            <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, Admin!</h2>
+                            <p class="text-gray-600 mb-6">This is your admin dashboard. Use the navigation to manage teachers and students.</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="card bg-blue-50">
+                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Manage Teachers</h3>
+                                    <p class="text-gray-600">Add, edit, or remove teacher accounts.</p>
+                                    <button onclick="renderManageTeachersPage()" class="btn-primary mt-4">Go to Page</button>
+                                </div>
+                                <div class="card bg-blue-50">
+                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Manage Students</h3>
+                                    <p class="text-gray-600">View, add, or remove student records.</p>
+                                    <button onclick="renderManageStudentsPage()" class="btn-primary mt-4">Go to Page</button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            `;
+        };
+
+        const renderManageTeachersPage = () => {
+            const teachers = getData('teachers', []);
+            const contentDiv = document.getElementById('admin-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Teachers</h2>
+                    <button onclick="renderAddTeacherForm()" class="btn-primary mb-4">Add New Teacher</button>
+                    <div id="add-teacher-form-container" class="hidden card bg-gray-50 p-4 mb-4"></div>
+                    <div class="marks-list-container mt-6">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachers-table-body" class="bg-white divide-y divide-gray-200">
+                                ${teachers.map((t, index) => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${t.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${t.username}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button onclick="deleteTeacher(${index})" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        };
+
+        window.renderAddTeacherForm = () => {
+            const formContainer = document.getElementById('add-teacher-form-container');
+            formContainer.classList.remove('hidden');
+            formContainer.innerHTML = `
+                <form id="add-teacher-form" class="space-y-4">
+                    <h3 class="text-xl font-bold">Add New Teacher</h3>
+                    <div>
+                        <label for="teacher-name" class="block text-sm font-medium text-gray-700">Teacher Name</label>
+                        <input type="text" id="teacher-name" class="input-field mt-1" required>
+                    </div>
+                    <div>
+                        <label for="teacher-username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <input type="text" id="teacher-username" class="input-field mt-1" required>
+                    </div>
+                    <div>
+                        <label for="teacher-password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="teacher-password" class="input-field mt-1" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Teacher</button>
+                    <button type="button" onclick="hideAddTeacherForm()" class="text-gray-500 hover:text-gray-700 font-medium ml-2">Cancel</button>
+                </form>
+            `;
+            document.getElementById('add-teacher-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addTeacher();
+            });
+        };
+
+        window.hideAddTeacherForm = () => {
+            document.getElementById('add-teacher-form-container').classList.add('hidden');
+        };
+
+        const addTeacher = () => {
+            const name = document.getElementById('teacher-name').value;
+            const username = document.getElementById('teacher-username').value;
+            const password = document.getElementById('teacher-password').value;
+
+            if (!name || !username || !password) {
+                alert('All fields are required.');
+                return;
+            }
+
+            const allTeachers = getData('teachers', []);
+            if (allTeachers.some(t => t.username === username)) {
+                alert('A teacher with this username already exists.');
+                return;
+            }
+
+            const newTeacher = { name, username, password };
+            setData('teachers', [...allTeachers, newTeacher]);
+            alert('Teacher added successfully!');
+            renderManageTeachersPage(); // Re-render the page
+        };
+
+        window.deleteTeacher = (index) => {
+            if (confirm('Are you sure you want to delete this teacher?')) {
+                const allTeachers = getData('teachers', []);
+                allTeachers.splice(index, 1);
+                setData('teachers', allTeachers);
+                alert('Teacher deleted successfully!');
+                renderManageTeachersPage();
+            }
+        };
+
+        const renderManageStudentsPage = () => {
+            const students = getData('students', []);
+            const contentDiv = document.getElementById('admin-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Students</h2>
+                    <button onclick="renderAddStudentPage()" class="btn-primary mb-4">Add New Student</button>
+                    <div class="marks-list-container mt-6">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adm No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-table-body" class="bg-white divide-y divide-gray-200">
+                                ${students.map((s, index) => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.id}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.class}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.gender}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button onclick="deleteStudent(${index})" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        };
+        
+        // Helper function to generate a teacher comment based on average marks
+        const getTeacherComment = (averageMarks) => {
+            if (averageMarks >= 90) return 'An outstanding performance this term. Your dedication is truly commendable.';
+            if (averageMarks >= 80) return 'A very strong performance. Continue to work hard and you will excel even further.';
+            if (averageMarks >= 70) return 'A solid and commendable effort. Focus on improving a few key areas to raise your overall grade.';
+            if (averageMarks >= 60) return 'A satisfactory performance. With more effort and focus, you can achieve better results.';
+            return 'There is room for improvement. It is important to seek help and focus on your studies to improve your grades.';
+        };
+        
+        // Helper function to simulate attendance data, as there is no UI to add it.
+        // In a real application, this data would be fetched from a database.
+        const getAttendanceData = () => {
+            const totalDays = 180;
+            const daysPresent = Math.floor(Math.random() * (totalDays - 170) + 170); // Random from 170 to 180
+            const daysAbsent = totalDays - daysPresent;
+            const tardies = Math.floor(Math.random() * 5); // Random from 0 to 4
+            return { totalDays, daysPresent, daysAbsent, tardies };
+        };
+
+        const renderGenerateReportsPage = () => {
+            const students = getData('students', []);
+            const terms = ['Term 1', 'Term 2', 'Term 3'];
+            const contentDiv = document.getElementById('teacher-content');
+
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Generate Student Reports</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label for="report-class-select" class="block text-sm font-medium text-gray-700">Select Class</label>
+                            <select id="report-class-select" class="mt-1 input-field">
+                                <option value="">Select a class...</option>
+                                ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="report-term-select" class="block text-sm font-medium text-gray-700">Select Term</label>
+                            <select id="report-term-select" class="mt-1 input-field">
+                                <option value="">Select a term...</option>
+                                ${terms.map(t => `<option value="${t}">${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="report-student-select" class="block text-sm font-medium text-gray-700">Select Student</label>
+                            <select id="report-student-select" class="mt-1 input-field" disabled>
+                                <option value="all">All Students</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button id="generate-report-btn" class="btn-primary w-full">Generate Report</button>
+                        </div>
+                    </div>
+                    <div id="report-output-container" class="mt-8 hidden">
+                        <div class="flex justify-end gap-4 mb-4 no-print">
+                            <button id="download-individual-btn" class="btn-primary flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M10 2a.75.75 0 01.75.75v7.5l2.22-2.22a.75.75 0 111.06 1.06l-3.5 3.5a.75.75 0 01-1.06 0l-3.5-3.5a.75.75 0 011.06-1.06L9.25 10.25V2.75A.75.75 0 0110 2zM5.75 12.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM5 15.5a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM15 15.5a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+                                </svg>
+                                Download Individual PDFs
+                            </button>
+                            <button id="print-pdf-btn" class="btn-primary flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+                                </svg>
+                                Download All as a Single PDF
+                            </button>
+                        </div>
+                        <div id="report-preview" class="p-8 bg-white shadow-xl rounded-lg overflow-y-auto max-h-[80vh]">
+                            <!-- Generated report will be inserted here -->
+                        </div>
+                    </div>
+                `;
+
+                const classSelect = document.getElementById('report-class-select');
+                const termSelect = document.getElementById('report-term-select');
+                const studentSelect = document.getElementById('report-student-select');
+                const generateBtn = document.getElementById('generate-report-btn');
+                const reportOutputContainer = document.getElementById('report-output-container');
+                const reportPreview = document.getElementById('report-preview');
+                const printPdfBtn = document.getElementById('print-pdf-btn');
+                const downloadIndividualBtn = document.getElementById('download-individual-btn');
+
+                // Function to generate the report HTML for a single student
+                const generateSingleReportHtml = (student, allMarks, selectedTerm, rank, totalStudents) => {
+                    const marksForStudent = allMarks.filter(m => m.studentId === student.id);
+                    const subjects = [...new Set(marksForStudent.map(m => m.subject))];
+                    
+                    const subjectBreakdown = subjects.map(subject => {
+                        const midTermMark = marksForStudent.find(m => m.subject === subject && m.examType === 'Mid-Term' && m.term === selectedTerm);
+                        const endTermMark = marksForStudent.find(m => m.subject === subject && m.examType === 'End of Term' && m.term === selectedTerm);
+                        const midTermScore = midTermMark ? midTermMark.marks : null;
+                        const endTermScore = endTermMark ? endTermMark.marks : null;
+                        
+                        let finalMark;
+                        if (midTermScore !== null && endTermScore !== null) {
+                            finalMark = (midTermScore + endTermScore) / 2;
+                        } else {
+                            finalMark = midTermScore || endTermScore;
+                        }
+                        
+                        return {
+                            subjectName: subject,
+                            midTermGrade: midTermScore !== null ? `${midTermScore} (${getGrade(midTermScore)})` : '-',
+                            endTermGrade: endTermScore !== null ? `${endTermScore} (${getGrade(endTermScore)})` : '-',
+                            finalGrade: finalMark !== null ? `${finalMark.toFixed(0)} (${getGrade(finalMark)})` : '-'
+                        };
+                    });
+
+                    const totalMarks = subjectBreakdown.filter(s => s.finalGrade !== '-').reduce((sum, s) => sum + parseFloat(s.finalGrade.split(' ')[0]), 0);
+                    const averageMarks = subjectBreakdown.filter(s => s.finalGrade !== '-').length > 0 ? (totalMarks / subjectBreakdown.filter(s => s.finalGrade !== '-').length) : 0;
+                    const teacherComment = getTeacherComment(averageMarks);
+                    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const attendance = getAttendanceData(); // Get mock attendance data
+
+                    const reportData = {
+                        ...student,
+                        date: today,
+                        subjects: subjectBreakdown,
+                        totalMarks: totalMarks,
+                        averageMarks: averageMarks,
+                        teacherComment: teacherComment,
+                        rank,
+                        totalStudents,
+                        attendance
+                    };
+
+                    return `
+                        <div class="report-container shadow-2xl rounded-lg">
+                            <div class="report-header">
+                                <img src="logo.png" alt="School Logo" class="mx-auto">
+                                <h1 class="font-bold text-white">Prince Alex Academy Report Form</h1>
+                                <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
+                            </div>
+                            
+                            <div class="p-6">
+                                <h3 class="section-title">Student Information</h3>
+                                <div class="grid grid-cols-2 gap-y-2">
+                                    <p><strong>Name:</strong> ${reportData.name}</p>
+                                    <p><strong>Class:</strong> ${reportData.class}</p>
+                                    <p><strong>Admission No:</strong> ${reportData.id}</p>
+                                    <p><strong>Date:</strong> ${reportData.date}</p>
+                                    <p><strong>Position:</strong> ${reportData.rank} of ${reportData.totalStudents}</p>
+                                    <p><strong>Average Score:</strong> ${reportData.averageMarks.toFixed(2)}%</p>
+                                </div>
+                                
+                                <h3 class="section-title mt-8">Grades</h3>
+                                <table class="report-table w-full mt-4">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="p-2">Subject Name</th>
+                                            <th class="p-2 text-center">Mid Term Grade</th>
+                                            <th class="p-2 text-center">End Term Grade</th>
+                                            <th class="p-2 text-center">Final Grade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${reportData.subjects.map(s => `
+                                            <tr class="border-b">
+                                                <td class="p-2">${s.subjectName}</td>
+                                                <td class="p-2 text-center">${s.midTermGrade}</td>
+                                                <td class="p-2 text-center">${s.endTermGrade}</td>
+                                                <td class="p-2 text-center font-bold">${s.finalGrade}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                                
+                                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <h3 class="section-title">Grading Scale</h3>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>A: 90–100%</li>
+                                            <li>B: 80–89%</li>
+                                            <li>C: 70–79%</li>
+                                            <li>D: 60–69%</li>
+                                            <li>F: Below 60%</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h3 class="section-title">Attendance</h3>
+                                        <ul class="list-inside space-y-1">
+                                            <li><strong>Days Present:</strong> ${reportData.attendance.daysPresent}</li>
+                                            <li><strong>Days Absent:</strong> ${reportData.attendance.daysAbsent}</li>
+                                            <li><strong>Tardies:</strong> ${reportData.attendance.tardies}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <h3 class="section-title mt-8">Teacher's Comment</h3>
+                                <p class="mt-2 text-gray-700">${reportData.teacherComment}</p>
+
+                                <div class="mt-12 flex justify-between items-end">
+                                    <div class="text-center">
+                                        <div class="signature-line"></div>
+                                        <p class="mt-2 text-sm text-gray-600">Parent/Guardian Signature</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="signature-line"></div>
+                                        <p class="mt-2 text-sm text-gray-600">Teacher Signature</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="signature-line"></div>
+                                        <p class="mt-2 text-sm text-gray-600">Principal Signature</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <p class="font-bold">Prince Alex Academy</p>
+                                <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                // Event listener to populate student dropdown when class is selected
+                classSelect.addEventListener('change', () => {
+                    const selectedClass = classSelect.value;
+                    studentSelect.innerHTML = '<option value="all">All Students</option>';
+                    studentSelect.disabled = true;
+
+                    if (selectedClass) {
+                        const allStudents = getData('students', []);
+                        const studentsInClass = allStudents.filter(s => s.class === selectedClass);
+                        studentsInClass.forEach(student => {
+                            const option = document.createElement('option');
+                            option.value = student.id;
+                            option.textContent = student.name;
+                            studentSelect.appendChild(option);
+                        });
+                        studentSelect.disabled = false;
+                    }
+                });
+
+                // Helper function to calculate a student's average mark for a given term
+                const calculateStudentAverage = (studentId, selectedTerm) => {
+                    const allMarks = getData('marks', []);
+                    const studentMarks = allMarks.filter(m => m.studentId === studentId && m.term === selectedTerm);
+                    
+                    const subjects = [...new Set(studentMarks.map(m => m.subject))];
+                    let totalFinalMarks = 0;
+                    let subjectCount = 0;
+
+                    subjects.forEach(subject => {
+                        const midTermMark = studentMarks.find(m => m.subject === subject && m.examType === 'Mid-Term');
+                        const endTermMark = studentMarks.find(m => m.subject === subject && m.examType === 'End of Term');
+                        const midTermScore = midTermMark ? midTermMark.marks : null;
+                        const endTermScore = endTermMark ? endTermMark.marks : null;
+                        
+                        let finalMark;
+                        if (midTermScore !== null && endTermScore !== null) {
+                            finalMark = (midTermScore + endTermScore) / 2;
+                        } else {
+                            finalMark = midTermScore || endTermScore;
+                        }
+                        if (finalMark !== null) {
+                            totalFinalMarks += finalMark;
+                            subjectCount++;
+                        }
+                    });
+
+                    return subjectCount > 0 ? totalFinalMarks / subjectCount : 0;
+                };
+
+                // Generate report preview
+                generateBtn.addEventListener('click', () => {
+                    const selectedClass = classSelect.value;
+                    const selectedTerm = termSelect.value;
+                    const selectedStudentId = studentSelect.value;
+
+                    if (!selectedClass || !selectedTerm) {
+                        alert('Please select a class and a term.');
+                        return;
+                    }
+
+                    const allStudents = getData('students', []);
+                    const allMarks = getData('marks', []);
+                    const classStudents = allStudents.filter(s => s.class === selectedClass);
+                    const totalStudents = classStudents.length;
+
+                    // Calculate average marks and rank all students in the class
+                    const studentAverages = classStudents.map(student => ({
+                        id: student.id,
+                        average: calculateStudentAverage(student.id, selectedTerm)
+                    }));
+
+                    // Sort students by average mark in descending order to determine rank
+                    studentAverages.sort((a, b) => b.average - a.average);
+
+                    const studentRankMap = {};
+                    studentAverages.forEach((student, index) => {
+                        studentRankMap[student.id] = index + 1;
+                    });
+
+                    let studentsToReport = [];
+                    if (selectedStudentId === 'all') {
+                        studentsToReport = classStudents;
+                    } else {
+                        const student = classStudents.find(s => s.id === selectedStudentId);
+                        if (student) {
+                            studentsToReport.push(student);
+                        }
+                    }
+
+                    if (studentsToReport.length === 0) {
+                        alert('No students found for the selected criteria.');
+                        return;
+                    }
+
+                    // Check if marks exist for the selected class and term
+                    const classMarks = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm);
+                    if (classMarks.length === 0) {
+                         alert('No marks found for this class and term.');
+                        return;
+                    }
+
+                    let reportHtml = '';
+                    studentsToReport.forEach((student, index) => {
+                        if (index > 0) reportHtml += '<div class="page-break"></div>';
+                        const rank = studentRankMap[student.id];
+                        reportHtml += generateSingleReportHtml(student, allMarks, selectedTerm, rank, totalStudents);
+                    });
+                    
+                    reportPreview.innerHTML = reportHtml;
+                    reportOutputContainer.classList.remove('hidden');
+                });
+
+                // Download all reports as a single PDF
+                printPdfBtn.onclick = () => {
+                    const selectedClass = classSelect.value;
+                    const selectedTerm = termSelect.value;
+                    if (!selectedClass || !selectedTerm) {
+                        alert('Please generate a report first.');
+                        return;
+                    }
+                    html2pdf().from(reportPreview).set({
+                        margin: [10, 10, 10, 10],
+                        filename: `Student_Reports_${selectedClass}_${selectedTerm}.pdf`,
+                        html2canvas: { scale: 2 },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    }).save();
+                };
+
+                // Download individual PDFs for all students
+                downloadIndividualBtn.onclick = async () => {
+                    const selectedClass = classSelect.value;
+                    const selectedTerm = termSelect.value;
+                    if (!selectedClass || !selectedTerm) {
+                        alert('Please select a class and a term.');
+                        return;
+                    }
+
+                    const allStudents = getData('students', []);
+                    const allMarks = getData('marks', []);
+                    const studentsToDownload = allStudents.filter(s => s.class === selectedClass);
+                    const totalStudents = studentsToDownload.length;
+
+                    if (studentsToDownload.length === 0) {
+                        alert('No students found in this class to download reports for.');
+                        return;
+                    }
+                    
+                    const classMarks = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm);
+                    if (classMarks.length === 0) {
+                         alert('No marks found for this class and term.');
+                        return;
+                    }
+
+                    // Calculate average marks and rank all students in the class
+                    const studentAverages = studentsToDownload.map(student => ({
+                        id: student.id,
+                        average: calculateStudentAverage(student.id, selectedTerm)
+                    }));
+                    studentAverages.sort((a, b) => b.average - a.average);
+                    const studentRankMap = {};
+                    studentAverages.forEach((student, index) => {
+                        studentRankMap[student.id] = index + 1;
+                    });
+
+
+                    const originalBtnText = downloadIndividualBtn.innerHTML;
+                    downloadIndividualBtn.innerHTML = `
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Downloading...
+                    `;
+                    downloadIndividualBtn.disabled = true;
+
+                    for (const student of studentsToDownload) {
+                        const rank = studentRankMap[student.id];
+                        const reportHtml = generateSingleReportHtml(student, allMarks, selectedTerm, rank, totalStudents);
+                        const tempElement = document.createElement('div');
+                        tempElement.innerHTML = reportHtml;
+
+                        await html2pdf().from(tempElement).set({
+                            margin: [10, 10, 10, 10],
+                            filename: `Report_${student.name.replace(/\s/g, '_')}_${selectedTerm}.pdf`,
+                            html2canvas: { scale: 2 },
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        }).save();
+
+                        // Add a small delay to prevent browser download manager from getting overwhelmed
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+
+                    downloadIndividualBtn.innerHTML = originalBtnText;
+                    downloadIndividualBtn.disabled = false;
+                    alert('All individual reports have been downloaded!');
+                };
+            }
+        };
+
+        // --- Main Application Flow Control ---
+        const renderPage = () => {
+            initialSetup();
+            const session = getData('session', null);
+            if (!session) {
+                renderLandingPage();
+            } else if (session.role === 'teacher') {
+                renderTeacherDashboard();
+            } else if (session.role === 'admin') {
+                renderAdminDashboard();
+            }
+        };
+
+        // Initialize the app on window load
+        window.onload = renderPage;
+
+    </script>
+</body>
+</html>
