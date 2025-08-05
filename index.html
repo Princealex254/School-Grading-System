@@ -170,6 +170,8 @@
         };
 
         const classes = ['Form 1', 'Form 2', 'Form 3', 'Form 4'];
+        const currentYear = new Date().getFullYear();
+        const academicYears = Array.from({ length: 5 }, (_, i) => (currentYear - 2 + i).toString()); // e.g., 2023, 2024, 2025, 2026, 2027
 
         // Updated grading scale
         const getGrade = (mark) => {
@@ -193,14 +195,14 @@
 
             if (!localStorage.getItem('students')) {
                 const dummyStudents = [
-                    { id: 'S001', name: 'Alice Johnson', class: 'Form 1', gender: 'Female' },
-                    { id: 'S002', name: 'Bob Williams', class: 'Form 1', gender: 'Male' },
-                    { id: 'S003', name: 'Charlie Brown', class: 'Form 2', gender: 'Male' },
-                    { id: 'S004', name: 'Diana Miller', class: 'Form 2', gender: 'Female' },
-                    { id: 'S005', name: 'Evan Green', class: 'Form 3', gender: 'Male' },
-                    { id: 'S006', name: 'Fiona White', class: 'Form 3', gender: 'Female' },
-                    { id: 'S007', name: 'George Evans', class: 'Form 4', gender: 'Male' },
-                    { id: 'S008', name: 'Hannah Davis', class: 'Form 4', gender: 'Female' },
+                    { id: 'S001', name: 'Alice Johnson', class: 'Form 1', gender: 'Female', dob: '2010-05-15', parentName: 'Mr. Johnson', parentContact: '111-222-3333', behaviorNotes: 'Excellent conduct.', awards: ['Mathlete 2024'] },
+                    { id: 'S002', name: 'Bob Williams', class: 'Form 1', gender: 'Male', dob: '2010-03-20', parentName: 'Ms. Williams', parentContact: '444-555-6666', behaviorNotes: 'Active participant.', awards: [] },
+                    { id: 'S003', name: 'Charlie Brown', class: 'Form 2', gender: 'Male', dob: '2009-09-01', parentName: 'Mrs. Brown', parentContact: '777-888-9999', behaviorNotes: 'Needs to focus more in class.', awards: [] },
+                    { id: 'S004', name: 'Diana Miller', class: 'Form 2', gender: 'Female', dob: '2009-01-10', parentName: 'Mr. Miller', parentContact: '000-111-2222', behaviorNotes: 'Consistently high effort.', awards: ['Science Fair Winner'] },
+                    { id: 'S005', name: 'Evan Green', class: 'Form 3', gender: 'Male', dob: '2008-07-22', parentName: 'Ms. Green', parentContact: '333-444-5555', behaviorNotes: 'Good progress this term.', awards: [] },
+                    { id: 'S006', name: 'Fiona White', class: 'Form 3', gender: 'Female', dob: '2008-04-05', parentName: 'Mr. White', parentContact: '666-777-8888', behaviorNotes: 'Excellent leadership skills.', awards: [] },
+                    { id: 'S007', name: 'George Evans', class: 'Form 4', gender: 'Male', dob: '2007-11-30', parentName: 'Mrs. Evans', parentContact: '999-000-1111', behaviorNotes: 'Consistent academic performance.', awards: ['Debate Team Captain'] },
+                    { id: 'S008', name: 'Hannah Davis', class: 'Form 4', gender: 'Female', dob: '2007-02-18', parentName: 'Mr. Davis', parentContact: '222-333-4444', behaviorNotes: 'Always willing to help others.', awards: [] },
                 ];
                 setData('students', dummyStudents);
             }
@@ -213,34 +215,62 @@
             // Marks data will be added by the teacher
             if (!localStorage.getItem('marks')) {
                  const dummyMarks = [
-                    // Term 1, Mid-Term
-                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'Mid-Term', marks: 85, teacher: 'john.doe' },
-                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'Mid-Term', marks: 78, teacher: 'john.doe' },
-                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'Mid-Term', marks: 92, teacher: 'jane.smith' },
-                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'Mid-Term', marks: 88, teacher: 'jane.smith' },
-                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 65, teacher: 'john.doe' },
-                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 95, teacher: 'john.doe' },
-                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 1', examType: 'Mid-Term', marks: 70, teacher: 'john.doe' },
-                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 1', examType: 'Mid-Term', marks: 80, teacher: 'jane.smith' },
-                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 1', examType: 'Mid-Term', marks: 90, teacher: 'john.doe' },
-                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 1', examType: 'Mid-Term', marks: 85, teacher: 'jane.smith' },
-                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 88, teacher: 'john.doe' },
-                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'Mid-Term', marks: 82, teacher: 'john.doe' },
-                    // Term 1, End of Term
-                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'End of Term', marks: 95, teacher: 'john.doe' },
-                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', examType: 'End of Term', marks: 82, teacher: 'john.doe' },
-                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'End of Term', marks: 95, teacher: 'jane.smith' },
-                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 1', examType: 'End of Term', marks: 90, teacher: 'jane.smith' },
-                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 75, teacher: 'john.doe' },
-                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 98, teacher: 'john.doe' },
-                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 1', examType: 'End of Term', marks: 75, teacher: 'john.doe' },
-                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 1', examType: 'End of Term', marks: 85, teacher: 'jane.smith' },
-                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 1', examType: 'End of Term', marks: 92, teacher: 'john.doe' },
-                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 1', examType: 'End of Term', marks: 88, teacher: 'jane.smith' },
-                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 90, teacher: 'john.doe' },
-                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 1', examType: 'End of Term', marks: 85, teacher: 'john.doe' },
+                    // Term 1, Mid-Term, 2025
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 85, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 78, teacher: 'john.doe' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 92, teacher: 'jane.smith' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 88, teacher: 'jane.smith' },
+                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 65, teacher: 'john.doe' },
+                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 95, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 70, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 80, teacher: 'jane.smith' },
+                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 90, teacher: 'john.doe' },
+                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 85, teacher: 'jane.smith' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 88, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 1', year: '2025', examType: 'Mid-Term', marks: 82, teacher: 'john.doe' },
+                    // Term 1, End of Term, 2025
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 95, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 82, teacher: 'john.doe' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 95, teacher: 'jane.smith' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 90, teacher: 'jane.smith' },
+                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 75, teacher: 'john.doe' },
+                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 98, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 75, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 85, teacher: 'jane.smith' },
+                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 92, teacher: 'john.doe' },
+                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 88, teacher: 'jane.smith' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 90, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 1', year: '2025', examType: 'End of Term', marks: 85, teacher: 'john.doe' },
+
+                    // Term 2, Mid-Term, 2025
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Mathematics', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 88, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Mathematics', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 75, teacher: 'john.doe' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'English', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 90, teacher: 'jane.smith' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'English', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 85, teacher: 'jane.smith' },
+                    { studentId: 'S003', studentName: 'Charlie Brown', class: 'Form 2', subject: 'Science', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 70, teacher: 'john.doe' },
+                    { studentId: 'S004', studentName: 'Diana Miller', class: 'Form 2', subject: 'Science', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 90, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'Mathematics', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 78, teacher: 'john.doe' },
+                    { studentId: 'S005', studentName: 'Evan Green', class: 'Form 3', subject: 'English', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 88, teacher: 'jane.smith' },
+                    { studentId: 'S007', studentName: 'George Evans', class: 'Form 4', subject: 'Physics', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 85, teacher: 'john.doe' },
+                    { studentId: 'S008', studentName: 'Hannah Davis', class: 'Form 4', subject: 'Chemistry', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 90, teacher: 'jane.smith' },
+                    { studentId: 'S001', studentName: 'Alice Johnson', class: 'Form 1', subject: 'Science', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 85, teacher: 'john.doe' },
+                    { studentId: 'S002', studentName: 'Bob Williams', class: 'Form 1', subject: 'Science', term: 'Term 2', year: '2025', examType: 'Mid-Term', marks: 79, teacher: 'john.doe' },
                 ];
                 setData('marks', dummyMarks);
+            }
+
+            if (!localStorage.getItem('fees')) {
+                const dummyFees = [
+                    { studentId: 'S001', term: 'Term 1', year: '2025', amountDue: 50000, amountPaid: 50000, status: 'Paid', date: '2025-01-10' },
+                    { studentId: 'S002', term: 'Term 1', year: '2025', amountDue: 50000, amountPaid: 45000, status: 'Partial', date: '2025-01-15' },
+                    { studentId: 'S003', term: 'Term 1', year: '2025', amountDue: 50000, amountPaid: 0, status: 'Pending', date: '' },
+                    { studentId: 'S001', term: 'Term 2', year: '2025', amountDue: 50000, amountPaid: 25000, status: 'Partial', date: '2025-05-01' },
+                ];
+                setData('fees', dummyFees);
+            }
+
+            if (!localStorage.getItem('files')) {
+                setData('files', []); // For mock file uploads
             }
         };
 
@@ -268,6 +298,47 @@
         const logout = () => {
             localStorage.removeItem('session');
             renderPage();
+        };
+
+        // Function to toggle sidebar visibility
+        const toggleSidebar = (role) => {
+            const sidebar = document.getElementById(`${role}-sidebar`);
+            const overlay = document.getElementById(`${role}-sidebar-overlay`);
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            }
+        };
+
+        // Helper to calculate average marks for a student for a given term/year
+        const calculateStudentAverage = (studentId, term, year) => {
+            const allMarks = getData('marks', []);
+            const studentMarks = allMarks.filter(m => m.studentId === studentId && m.term === term && m.year === year);
+            
+            const subjects = [...new Set(studentMarks.map(m => m.subject))];
+            let totalFinalMarks = 0;
+            let subjectCount = 0;
+
+            subjects.forEach(subject => {
+                const midTermMark = studentMarks.find(m => m.subject === subject && m.examType === 'Mid-Term');
+                const endTermMark = studentMarks.find(m => m.subject === subject && m.examType === 'End of Term');
+                const midTermScore = midTermMark ? midTermMark.marks : null;
+                const endTermScore = endTermMark ? endTermMark.marks : null;
+                
+                let finalMark;
+                if (midTermScore !== null && endTermScore !== null) {
+                    finalMark = (midTermScore + endTermScore) / 2;
+                } else {
+                    finalMark = midTermScore || endTermScore;
+                }
+                if (finalMark !== null) {
+                    totalFinalMarks += finalMark;
+                    subjectCount++;
+                }
+            });
+
+            return subjectCount > 0 ? totalFinalMarks / subjectCount : 0;
         };
 
         // --- Page Rendering Functions ---
@@ -317,10 +388,24 @@
         // Render the teacher dashboard
         const renderTeacherDashboard = () => {
             const session = getData('session', {});
+            const students = getData('students', []);
+            const marks = getData('marks', []);
+            const currentAcademicYear = new Date().getFullYear().toString();
+            const currentTerm = 'Term 1'; // Assuming a default current term for ranking display
+
+            // Calculate top 5 students for the current term and year
+            const studentAverages = students.map(student => ({
+                ...student,
+                average: calculateStudentAverage(student.id, currentTerm, currentAcademicYear)
+            })).filter(s => s.average > 0); // Only include students with marks
+
+            studentAverages.sort((a, b) => b.average - a.average);
+            const top5Students = studentAverages.slice(0, 5);
+
             appContainer.innerHTML = `
                 <div class="flex flex-col md:flex-row min-h-screen bg-blue-50">
                     <!-- Sidebar Navigation -->
-                    <aside class="w-full md:w-64 bg-white p-6 shadow-lg rounded-lg md:rounded-r-none md:rounded-l-lg mb-4 md:mb-0">
+                    <aside id="teacher-sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-200 ease-in-out w-64 bg-white p-6 shadow-lg z-50 md:rounded-r-none md:rounded-l-lg rounded-lg">
                         <div class="flex items-center mb-6">
                             <img src="logo.png" alt="School Logo" class="w-10 h-10 rounded-full mr-3">
                             <span class="text-xl font-bold text-blue-600">PAAGS</span>
@@ -332,39 +417,83 @@
                             <a href="#" onclick="renderViewEditMarksPage()" class="block nav-link">View/Edit Marks</a>
                             <a href="#" onclick="renderStudentPerformancePage()" class="block nav-link">Student Performance</a>
                             <a href="#" onclick="renderAddStudentPage()" class="block nav-link">Add Student</a>
+                            <a href="#" onclick="renderManageStudentProfilesPage()" class="block nav-link">Manage Student Profiles</a>
                             <a href="#" onclick="renderGenerateReportsPage()" class="block nav-link">Generate Reports</a>
+                            <a href="#" onclick="renderFileUploadPage()" class="block nav-link">File Uploads</a>
                         </nav>
                         <div class="mt-8">
                              <button onclick="logout()" class="btn-primary w-full text-center">Logout</button>
                         </div>
                     </aside>
-                    <!-- Main Content -->
-                    <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
-                        <div id="teacher-content">
-                            <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, ${session.name}!</h2>
-                            <p class="text-gray-600 mb-6">This is your teacher dashboard. Use the navigation to manage student grades.</p>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <div class="card bg-blue-50">
-                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Enter Marks</h3>
-                                    <p class="text-gray-600">Add new marks for your students.</p>
-                                    <button onclick="renderEnterMarksPage()" class="btn-primary mt-4">Go to Page</button>
+
+                    <!-- Overlay for mobile sidebar -->
+                    <div id="teacher-sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden" onclick="toggleSidebar('teacher')"></div>
+
+                    <!-- Main Content Area -->
+                    <div class="flex-1 flex flex-col">
+                        <!-- Mobile menu button -->
+                        <button id="teacher-menu-btn" class="md:hidden p-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 m-4 self-start">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
+                            <div id="teacher-content">
+                                <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, ${session.name}!</h2>
+                                <p class="text-gray-600 mb-6">This is your teacher dashboard. Use the navigation to manage student grades.</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">Enter Marks</h3>
+                                        <p class="text-gray-600">Add new marks for your students.</p>
+                                        <button onclick="renderEnterMarksPage()" class="btn-primary mt-4">Go to Page</button>
+                                    </div>
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">View & Edit Marks</h3>
+                                        <p class="text-gray-600">Review and modify existing grades.</p>
+                                        <button onclick="renderViewEditMarksPage()" class="btn-primary mt-4">Go to Page</button>
+                                    </div>
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">Add Student</h3>
+                                        <p class="text-gray-600">Add new students to the system.</p>
+                                        <button onclick="renderAddStudentPage()" class="btn-primary mt-4">Go to Page</button>
+                                    </div>
                                 </div>
-                                <div class="card bg-blue-50">
-                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">View & Edit Marks</h3>
-                                    <p class="text-gray-600">Review and modify existing grades.</p>
-                                    <button onclick="renderViewEditMarksPage()" class="btn-primary mt-4">Go to Page</button>
-                                </div>
-                                <div class="card bg-blue-50">
-                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Add Student</h3>
-                                    <p class="text-gray-600">Add new students to the system.</p>
-                                    <button onclick="renderAddStudentPage()" class="btn-primary mt-4">Go to Page</button>
+
+                                <h3 class="text-3xl font-bold text-gray-800 mb-6">Top 5 Students (${currentTerm}, ${currentAcademicYear})</h3>
+                                <div class="card">
+                                    <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            ${top5Students.length > 0 ? top5Students.map((s, index) => `
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap">${index + 1}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">${s.name}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">${s.class}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">${s.average.toFixed(2)}%</td>
+                                                </tr>
+                                            `).join('') : `
+                                                <tr>
+                                                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No top students to display for this term/year.</td>
+                                                </tr>
+                                            `}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </div>
-                    </main>
+                        </main>
+                    </div>
                 </div>
             `;
+            // Attach event listener for mobile menu button
+            document.getElementById('teacher-menu-btn').addEventListener('click', () => toggleSidebar('teacher'));
         };
         
         const renderAddStudentPage = () => {
@@ -397,46 +526,141 @@
                                     <option value="Female">Female</option>
                                 </select>
                             </div>
+                            <div>
+                                <label for="student-dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                <input type="date" id="student-dob" class="input-field mt-1">
+                            </div>
+                            <div>
+                                <label for="parent-name" class="block text-sm font-medium text-gray-700">Parent/Guardian Name</label>
+                                <input type="text" id="parent-name" class="input-field mt-1">
+                            </div>
+                            <div>
+                                <label for="parent-contact" class="block text-sm font-medium text-gray-700">Parent/Guardian Contact</label>
+                                <input type="text" id="parent-contact" class="input-field mt-1" placeholder="e.g., 0712345678">
+                            </div>
+                            <div>
+                                <label for="behavior-notes" class="block text-sm font-medium text-gray-700">Behavior Notes</label>
+                                <textarea id="behavior-notes" class="input-field mt-1" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label for="awards" class="block text-sm font-medium text-gray-700">Awards (comma-separated)</label>
+                                <input type="text" id="awards" class="input-field mt-1" placeholder="e.g., Mathlete 2024, Best in Science">
+                            </div>
                         </div>
                         <button type="submit" class="btn-primary w-full md:w-auto">Add Student</button>
                     </form>
+
+                    <h3 class="text-2xl font-bold text-gray-800 mt-8 mb-4">Import Students (CSV)</h3>
+                    <div class="card bg-gray-50 p-4">
+                        <p class="text-gray-600 mb-2">Upload a CSV file with student data. The CSV should have columns: Admission No.,Student Name,Class,Gender,Date of Birth (YYYY-MM-DD),Parent/Guardian Name,Parent/Guardian Contact,Behavior Notes,Awards (comma-separated).</p>
+                        <input type="file" id="csv-upload" accept=".csv" class="input-field mt-2">
+                        <button id="import-csv-btn" class="btn-primary mt-4">Import CSV</button>
+                    </div>
                 `;
                  document.getElementById('add-student-form').addEventListener('submit', (e) => {
                     e.preventDefault();
                     addStudent();
                 });
+
+                document.getElementById('import-csv-btn').addEventListener('click', importStudentsFromCsv);
             }
         };
 
         // Centralized function to add a new student
-        const addStudent = (redirect = true) => {
-            const id = document.getElementById('student-id').value;
-            const name = document.getElementById('student-name').value;
-            const studentClass = document.getElementById('student-class').value;
-            const gender = document.getElementById('student-gender').value;
+        const addStudent = (redirect = true, studentData = null) => {
+            const id = studentData ? studentData.id : document.getElementById('student-id').value;
+            const name = studentData ? studentData.name : document.getElementById('student-name').value;
+            const studentClass = studentData ? studentData.class : document.getElementById('student-class').value;
+            const gender = studentData ? studentData.gender : document.getElementById('student-gender').value;
+            const dob = studentData ? studentData.dob : document.getElementById('student-dob').value;
+            const parentName = studentData ? studentData.parentName : document.getElementById('parent-name').value;
+            const parentContact = studentData ? studentData.parentContact : document.getElementById('parent-contact').value;
+            const behaviorNotes = studentData ? studentData.behaviorNotes : document.getElementById('behavior-notes').value;
+            const awards = studentData ? studentData.awards : document.getElementById('awards').value.split(',').map(a => a.trim()).filter(a => a);
 
             if (!id || !name || !studentClass || !gender) {
-                alert('Please fill in all the student details.');
+                alert('Please fill in all required student details (Admission No., Name, Class, Gender).');
                 return;
             }
 
             const allStudents = getData('students', []);
-            const newStudent = { id, name, class: studentClass, gender };
+            const newStudent = { id, name, class: studentClass, gender, dob, parentName, parentContact, behaviorNotes, awards };
 
             if (allStudents.some(s => s.id === id)) {
-                alert('A student with this Admission No. already exists.');
+                alert(`A student with Admission No. ${id} already exists. Skipping this entry.`);
                 return;
             }
 
             setData('students', [...allStudents, newStudent]);
-            alert('Student added successfully!');
             if (redirect) {
+                alert('Student added successfully!');
                 renderPage(); // Reloads to the correct dashboard and shows the updated list
             }
+            return true; // Indicate success for CSV import
+        };
+
+        const importStudentsFromCsv = () => {
+            const fileInput = document.getElementById('csv-upload');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a CSV file to upload.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                if (lines.length === 0) {
+                    alert('CSV file is empty.');
+                    return;
+                }
+
+                const headers = lines[0].split(',').map(h => h.trim());
+                const expectedHeaders = ['Admission No.', 'Student Name', 'Class', 'Gender', 'Date of Birth (YYYY-MM-DD)', 'Parent/Guardian Name', 'Parent/Guardian Contact', 'Behavior Notes', 'Awards (comma-separated)'];
+
+                if (headers.length !== expectedHeaders.length || !expectedHeaders.every(h => headers.includes(h))) {
+                    alert('CSV headers do not match the expected format. Please ensure you have: ' + expectedHeaders.join(', '));
+                    return;
+                }
+
+                let studentsAdded = 0;
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',');
+                    if (values.length !== headers.length) {
+                        console.warn(`Skipping malformed row: ${lines[i]}`);
+                        continue;
+                    }
+
+                    const studentData = {};
+                    headers.forEach((header, index) => {
+                        const value = values[index] ? values[index].trim() : '';
+                        switch (header) {
+                            case 'Admission No.': studentData.id = value; break;
+                            case 'Student Name': studentData.name = value; break;
+                            case 'Class': studentData.class = value; break;
+                            case 'Gender': studentData.gender = value; break;
+                            case 'Date of Birth (YYYY-MM-DD)': studentData.dob = value; break;
+                            case 'Parent/Guardian Name': studentData.parentName = value; break;
+                            case 'Parent/Guardian Contact': studentData.parentContact = value; break;
+                            case 'Behavior Notes': studentData.behaviorNotes = value; break;
+                            case 'Awards (comma-separated)': studentData.awards = value.split(',').map(a => a.trim()).filter(a => a); break;
+                        }
+                    });
+
+                    if (addStudent(false, studentData)) { // Pass false to prevent immediate redirect
+                        studentsAdded++;
+                    }
+                }
+                alert(`${studentsAdded} students imported successfully!`);
+                renderManageStudentsPage(); // Refresh the student list
+            };
+            reader.readAsText(file);
         };
 
         window.deleteStudent = (index) => {
-            if (confirm('Are you sure you want to delete this student? All their marks will be lost.')) {
+            if (confirm('Are you sure you want to delete this student? All their marks and fees records will be lost.')) {
                 let allStudents = getData('students', []);
                 const deletedStudentId = allStudents[index].id;
                 allStudents.splice(index, 1);
@@ -445,7 +669,12 @@
                 let allMarks = getData('marks', []);
                 const remainingMarks = allMarks.filter(mark => mark.studentId !== deletedStudentId);
                 setData('marks', remainingMarks);
-                alert('Student and their marks deleted successfully!');
+                // Also delete fees associated with this student
+                let allFees = getData('fees', []);
+                const remainingFees = allFees.filter(fee => fee.studentId !== deletedStudentId);
+                setData('fees', remainingFees);
+
+                alert('Student, their marks, and fees deleted successfully!');
                 renderManageStudentsPage();
             }
         };
@@ -458,7 +687,6 @@
                 'Home Science', 'Art and Design', 'Computer Studies', 'French', 'German', 'Music', 'Physical Education'
             ];
             const terms = ['Term 1', 'Term 2', 'Term 3'];
-            const examTypes = ['Mid-Term', 'End of Term'];
             const contentDiv = document.getElementById('teacher-content');
             if (contentDiv) {
                 contentDiv.innerHTML = `
@@ -487,10 +715,18 @@
                                 </select>
                             </div>
                             <div>
+                                <label for="year-select-marks" class="block text-sm font-medium text-gray-700">Academic Year</label>
+                                <select id="year-select-marks" class="mt-1 input-field">
+                                    <option value="">Select Year</option>
+                                    ${academicYears.map(y => `<option value="${y}" ${y === currentYear.toString() ? 'selected' : ''}>${y}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
                                 <label for="exam-type-select" class="block text-sm font-medium text-gray-700">Exam Type</label>
                                 <select id="exam-type-select" class="mt-1 input-field">
                                     <option value="">Select Exam Type</option>
-                                    ${examTypes.map(e => `<option value="${e}">${e}</option>`).join('')}
+                                    <option value="Mid-Term">Mid-Term</option>
+                                    <option value="End of Term">End of Term</option>
                                 </select>
                             </div>
                         </div>
@@ -547,11 +783,12 @@
             const selectedClass = form['class-select'].value;
             const selectedSubject = form['subject-select'].value;
             const selectedTerm = form['term-select'].value;
+            const selectedYear = form['year-select-marks'].value;
             const selectedExamType = form['exam-type-select'].value;
             const teacher = getData('session', {}).username;
 
-            if (!selectedClass || !selectedSubject || !selectedTerm || !selectedExamType) {
-                alert('Please select a class, subject, term, and exam type.');
+            if (!selectedClass || !selectedSubject || !selectedTerm || !selectedYear || !selectedExamType) {
+                alert('Please select a class, subject, term, academic year, and exam type.');
                 return;
             }
 
@@ -571,6 +808,7 @@
                         class: selectedClass,
                         subject: selectedSubject,
                         term: selectedTerm,
+                        year: selectedYear,
                         examType: selectedExamType,
                         marks: parseInt(marks, 10),
                         teacher: teacher
@@ -578,11 +816,12 @@
                 }
             });
 
-            // Filter out existing marks for the same criteria
+            // Filter out existing marks for the same criteria (studentId, subject, term, year, examType)
             const filteredMarks = allMarks.filter(mark =>
                 !(mark.class === selectedClass &&
                 mark.subject === selectedSubject &&
                 mark.term === selectedTerm &&
+                mark.year === selectedYear &&
                 mark.examType === selectedExamType)
             );
 
@@ -595,8 +834,8 @@
             const students = getData('students', []);
             const marks = getData('marks', []);
             const subjects = [...new Set(marks.map(m => m.subject))];
-            const terms = [...new Set(marks.map(m => m.term))];
-            const examTypes = [...new Set(marks.map(m => m.examType))];
+            const terms = ['Term 1', 'Term 2', 'Term 3']; // Ensure all terms are available
+            const examTypes = ['Mid-Term', 'End of Term']; // Ensure all exam types are available
 
             const contentDiv = document.getElementById('teacher-content');
             if (contentDiv) {
@@ -626,6 +865,13 @@
                                 </select>
                             </div>
                             <div>
+                                <label for="year-filter" class="block text-sm font-medium text-gray-700">Academic Year</label>
+                                <select id="year-filter" class="mt-1 input-field">
+                                    <option value="">All Years</option>
+                                    ${academicYears.map(y => `<option value="${y}">${y}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
                                 <label for="exam-type-filter" class="block text-sm font-medium text-gray-700">Exam Type</label>
                                 <select id="exam-type-filter" class="mt-1 input-field">
                                     <option value="">All Exam Types</option>
@@ -642,6 +888,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam Type</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -660,6 +907,7 @@
                     class: document.getElementById('class-filter'),
                     subject: document.getElementById('subject-filter'),
                     term: document.getElementById('term-filter'),
+                    year: document.getElementById('year-filter'),
                     examType: document.getElementById('exam-type-filter')
                 };
 
@@ -674,6 +922,9 @@
                     if (filters.term.value) {
                         filteredMarks = filteredMarks.filter(m => m.term === filters.term.value);
                     }
+                    if (filters.year.value) {
+                        filteredMarks = filteredMarks.filter(m => m.year === filters.year.value);
+                    }
                     if (filters.examType.value) {
                         filteredMarks = filteredMarks.filter(m => m.examType === filters.examType.value);
                     }
@@ -684,6 +935,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">${m.class}</td>
                             <td class="px-6 py-4 whitespace-nowrap">${m.subject}</td>
                             <td class="px-6 py-4 whitespace-nowrap">${m.term}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${m.year}</td>
                             <td class="px-6 py-4 whitespace-nowrap">${m.examType}</td>
                             <td class="px-6 py-4 whitespace-nowrap">${m.marks}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -704,6 +956,7 @@
                         (filters.class.value === '' || m.class === filters.class.value) &&
                         (filters.subject.value === '' || m.subject === filters.subject.value) &&
                         (filters.term.value === '' || m.term === filters.term.value) &&
+                        (filters.year.value === '' || m.year === filters.year.value) &&
                         (filters.examType.value === '' || m.examType === filters.examType.value)
                     );
                     const markToEdit = filteredMarks[index];
@@ -713,10 +966,11 @@
                         m.studentId === markToEdit.studentId &&
                         m.subject === markToEdit.subject &&
                         m.term === markToEdit.term &&
+                        m.year === markToEdit.year &&
                         m.examType === markToEdit.examType
                     );
 
-                    const newMark = prompt(`Enter new mark for ${markToEdit.studentName} in ${markToEdit.subject}:`, markToEdit.marks);
+                    const newMark = prompt(`Enter new mark for ${markToEdit.studentName} in ${markToEdit.subject} (${markToEdit.term}, ${markToEdit.year}):`, markToEdit.marks);
                     if (newMark !== null && !isNaN(newMark) && newMark >= 0 && newMark <= 100) {
                         marks[originalIndex].marks = parseInt(newMark, 10);
                         setData('marks', marks);
@@ -733,6 +987,7 @@
                             (filters.class.value === '' || m.class === filters.class.value) &&
                             (filters.subject.value === '' || m.subject === filters.subject.value) &&
                             (filters.term.value === '' || m.term === filters.term.value) &&
+                            (filters.year.value === '' || m.year === filters.year.value) &&
                             (filters.examType.value === '' || m.examType === filters.examType.value)
                         );
                         const markToDelete = filteredMarks[index];
@@ -741,6 +996,7 @@
                             m.studentId === markToDelete.studentId &&
                             m.subject === markToDelete.subject &&
                             m.term === markToDelete.term &&
+                            m.year === markToDelete.year &&
                             m.examType === markToDelete.examType
                         );
 
@@ -760,11 +1016,12 @@
         
         const renderStudentPerformancePage = () => {
             const students = getData('students', []);
+            const terms = ['Term 1', 'Term 2', 'Term 3'];
             const contentDiv = document.getElementById('teacher-content');
             if (contentDiv) {
                 contentDiv.innerHTML = `
                     <h2 class="text-3xl font-bold text-gray-800 mb-6">Student Performance</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
                             <label for="student-select-performance" class="block text-sm font-medium text-gray-700">Select Student</label>
                             <select id="student-select-performance" class="mt-1 input-field">
@@ -776,14 +1033,19 @@
                              <label for="term-select-performance" class="block text-sm font-medium text-gray-700">Select Term</label>
                              <select id="term-select-performance" class="mt-1 input-field">
                                 <option value="">Select a term...</option>
-                                <option value="Term 1">Term 1</option>
-                                <option value="Term 2">Term 2</option>
-                                <option value="Term 3">Term 3</option>
+                                ${terms.map(t => `<option value="${t}">${t}</option>`).join('')}
+                             </select>
+                        </div>
+                        <div>
+                             <label for="year-select-performance" class="block text-sm font-medium text-gray-700">Academic Year</label>
+                             <select id="year-select-performance" class="mt-1 input-field">
+                                <option value="">Select a year...</option>
+                                ${academicYears.map(y => `<option value="${y}" ${y === currentYear.toString() ? 'selected' : ''}>${y}</option>`).join('')}
                              </select>
                         </div>
                     </div>
                     <div id="performance-chart-container" class="mt-6 hidden">
-                        <h3 class="text-2xl font-semibold mb-4">Performance Graph</h3>
+                        <h3 class="text-2xl font-semibold mb-4">Performance Graph (Student vs. Class Average)</h3>
                         <canvas id="performanceChart" class="bg-gray-50 p-4 rounded-lg shadow-inner"></canvas>
                         <h3 class="text-2xl font-semibold mt-8 mb-4">Subject Breakdown</h3>
                         <div id="subject-breakdown" class="space-y-4"></div>
@@ -792,31 +1054,47 @@
 
                 const studentSelect = document.getElementById('student-select-performance');
                 const termSelect = document.getElementById('term-select-performance');
+                const yearSelect = document.getElementById('year-select-performance');
                 let performanceChart;
 
                 const updatePerformance = () => {
                     const studentId = studentSelect.value;
                     const term = termSelect.value;
+                    const year = yearSelect.value;
                     const chartContainer = document.getElementById('performance-chart-container');
                     const subjectBreakdownDiv = document.getElementById('subject-breakdown');
 
-                    if (!studentId || !term) {
+                    if (!studentId || !term || !year) {
                         chartContainer.classList.add('hidden');
                         return;
                     }
 
                     const allMarks = getData('marks', []);
-                    const studentMarks = allMarks.filter(m => m.studentId === studentId && m.term === term);
-                    const subjects = studentMarks.map(m => m.subject);
+                    const studentsInClass = getData('students', []).filter(s => {
+                        const student = students.find(st => st.id === studentId);
+                        return student && s.class === student.class;
+                    });
+
+                    const studentMarks = allMarks.filter(m => m.studentId === studentId && m.term === term && m.year === year);
+                    const subjects = [...new Set(studentMarks.map(m => m.subject))];
                     const marks = studentMarks.map(m => m.marks);
-                    const grades = studentMarks.map(m => getGrade(m.marks));
 
                     if (studentMarks.length === 0) {
                         chartContainer.classList.add('hidden');
-                        subjectBreakdownDiv.innerHTML = '<p class="text-center text-gray-500">No marks found for this student and term.</p>';
+                        subjectBreakdownDiv.innerHTML = '<p class="text-center text-gray-500">No marks found for this student, term, and year.</p>';
                         return;
                     }
                     
+                    // Calculate class average for each subject
+                    const classAverages = subjects.map(subject => {
+                        const subjectMarksInClass = allMarks.filter(m => 
+                            studentsInClass.some(s => s.id === m.studentId) &&
+                            m.subject === subject && m.term === term && m.year === year && m.examType === 'End of Term' // Using End of Term for class average
+                        );
+                        const totalSubjectMarks = subjectMarksInClass.reduce((sum, m) => sum + m.marks, 0);
+                        return subjectMarksInClass.length > 0 ? (totalSubjectMarks / subjectMarksInClass.length).toFixed(2) : 0;
+                    });
+
                     chartContainer.classList.remove('hidden');
 
                     if (performanceChart) {
@@ -828,13 +1106,22 @@
                         type: 'bar',
                         data: {
                             labels: subjects,
-                            datasets: [{
-                                label: `Marks for ${term}`,
-                                data: marks,
-                                backgroundColor: 'rgba(59, 130, 246, 0.5)', // blue-500 with opacity
-                                borderColor: 'rgba(59, 130, 246, 1)',
-                                borderWidth: 1
-                            }]
+                            datasets: [
+                                {
+                                    label: `Student Marks (${term}, ${year})`,
+                                    data: marks,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.7)', // blue-500 with opacity
+                                    borderColor: 'rgba(59, 130, 246, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: `Class Average (${term}, ${year})`,
+                                    data: classAverages,
+                                    backgroundColor: 'rgba(139, 92, 246, 0.7)', // indigo-500 with opacity
+                                    borderColor: 'rgba(139, 92, 246, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
                         },
                         options: {
                             responsive: true,
@@ -863,14 +1150,167 @@
 
                 studentSelect.addEventListener('change', updatePerformance);
                 termSelect.addEventListener('change', updatePerformance);
+                yearSelect.addEventListener('change', updatePerformance);
             }
         };
 
+        const renderManageStudentProfilesPage = () => {
+            const students = getData('students', []);
+            const contentDiv = document.getElementById('teacher-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Student Profiles</h2>
+                    <div class="marks-list-container mt-6">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adm No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Contact</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Behavior Notes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Awards</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-table-body" class="bg-white divide-y divide-gray-200">
+                                ${students.map((s, index) => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.id}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.class}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.gender}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.dob || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.parentName || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.parentContact || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">${s.behaviorNotes || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">${s.awards && s.awards.length > 0 ? s.awards.join(', ') : '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button onclick="editStudentProfile(${index})" class="text-blue-600 hover:text-blue-900 font-semibold mr-2">Edit</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        };
+
+        window.editStudentProfile = (index) => {
+            let students = getData('students', []);
+            const student = students[index];
+
+            const formHtml = `
+                <div id="edit-student-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+                        <h3 class="text-2xl font-bold mb-6">Edit Student Profile: ${student.name}</h3>
+                        <form id="edit-student-form" class="space-y-4">
+                            <div>
+                                <label for="edit-student-name" class="block text-sm font-medium text-gray-700">Student Name</label>
+                                <input type="text" id="edit-student-name" value="${student.name}" class="input-field mt-1" required>
+                            </div>
+                            <div>
+                                <label for="edit-student-class" class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="edit-student-class" class="input-field mt-1" required>
+                                    ${classes.map(c => `<option value="${c}" ${student.class === c ? 'selected' : ''}>${c}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="edit-student-gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                                <select id="edit-student-gender" class="input-field mt-1" required>
+                                    <option value="Male" ${student.gender === 'Male' ? 'selected' : ''}>Male</option>
+                                    <option value="Female" ${student.gender === 'Female' ? 'selected' : ''}>Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="edit-student-dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                <input type="date" id="edit-student-dob" value="${student.dob || ''}" class="input-field mt-1">
+                            </div>
+                            <div>
+                                <label for="edit-parent-name" class="block text-sm font-medium text-gray-700">Parent/Guardian Name</label>
+                                <input type="text" id="edit-parent-name" value="${student.parentName || ''}" class="input-field mt-1">
+                            </div>
+                            <div>
+                                <label for="edit-parent-contact" class="block text-sm font-medium text-gray-700">Parent/Guardian Contact</label>
+                                <input type="text" id="edit-parent-contact" value="${student.parentContact || ''}" class="input-field mt-1">
+                            </div>
+                            <div>
+                                <label for="edit-behavior-notes" class="block text-sm font-medium text-gray-700">Behavior Notes</label>
+                                <textarea id="edit-behavior-notes" class="input-field mt-1" rows="3">${student.behaviorNotes || ''}</textarea>
+                            </div>
+                            <div>
+                                <label for="edit-awards" class="block text-sm font-medium text-gray-700">Awards (comma-separated)</label>
+                                <input type="text" id="edit-awards" value="${student.awards ? student.awards.join(', ') : ''}" class="input-field mt-1">
+                            </div>
+                            <div class="flex justify-end space-x-4 mt-6">
+                                <button type="button" onclick="closeModal('edit-student-modal')" class="btn-primary bg-gray-500 hover:bg-gray-600">Cancel</button>
+                                <button type="submit" class="btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', formHtml);
+
+            document.getElementById('edit-student-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                student.name = document.getElementById('edit-student-name').value;
+                student.class = document.getElementById('edit-student-class').value;
+                student.gender = document.getElementById('edit-student-gender').value;
+                student.dob = document.getElementById('edit-student-dob').value;
+                student.parentName = document.getElementById('edit-parent-name').value;
+                student.parentContact = document.getElementById('edit-parent-contact').value;
+                student.behaviorNotes = document.getElementById('edit-behavior-notes').value;
+                student.awards = document.getElementById('edit-awards').value.split(',').map(a => a.trim()).filter(a => a);
+
+                setData('students', students);
+                alert('Student profile updated successfully!');
+                closeModal('edit-student-modal');
+                renderManageStudentProfilesPage(); // Refresh the list
+            });
+        };
+
+        window.closeModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.remove();
+            }
+        };
+
+
         const renderAdminDashboard = () => {
+            const students = getData('students', []);
+            const teachers = getData('teachers', []);
+            const marks = getData('marks', []);
+            const fees = getData('fees', []);
+
+            const totalStudents = students.length;
+            const totalTeachers = teachers.length;
+            const numClasses = classes.length; // Assuming 'classes' array defines all classes
+
+            const currentAcademicYear = new Date().getFullYear().toString();
+            const currentTerm = 'Term 1'; // Assuming a default current term for display
+
+            // Calculate top student for current term/year
+            const studentAverages = students.map(student => ({
+                ...student,
+                average: calculateStudentAverage(student.id, currentTerm, currentAcademicYear)
+            })).filter(s => s.average > 0);
+            studentAverages.sort((a, b) => b.average - a.average);
+            const topStudent = studentAverages.length > 0 ? studentAverages[0] : null;
+
+            // Calculate pending reports (simple logic: any student without an "End of Term" mark for current term/year)
+            const studentsWithEndOfTermMarks = new Set(marks.filter(m => m.examType === 'End of Term' && m.term === currentTerm && m.year === currentAcademicYear).map(m => m.studentId));
+            const pendingReportsCount = students.filter(s => !studentsWithEndOfTermMarks.has(s.id)).length;
+
             appContainer.innerHTML = `
                 <div class="flex flex-col md:flex-row min-h-screen bg-blue-50">
                     <!-- Sidebar Navigation -->
-                    <aside class="w-full md:w-64 bg-white p-6 shadow-lg rounded-lg md:rounded-r-none md:rounded-l-lg mb-4 md:mb-0">
+                    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-200 ease-in-out w-64 bg-white p-6 shadow-lg z-50 md:rounded-r-none md:rounded-l-lg rounded-lg">
                         <div class="flex items-center mb-6">
                             <img src="logo.png" alt="School Logo" class="w-10 h-10 rounded-full mr-3">
                             <span class="text-xl font-bold text-blue-600">PAAGS</span>
@@ -880,32 +1320,83 @@
                             <a href="#" onclick="renderAdminDashboard()" class="block nav-link bg-blue-100 text-blue-700 font-semibold">Dashboard</a>
                             <a href="#" onclick="renderManageTeachersPage()" class="block nav-link">Manage Teachers</a>
                             <a href="#" onclick="renderManageStudentsPage()" class="block nav-link">Manage Students</a>
+                            <a href="#" onclick="renderFeeTrackingPage()" class="block nav-link">Fee Tracking</a>
+                            <a href="#" onclick="renderFileUploadPage()" class="block nav-link">File Uploads</a>
+                            <a href="#" onclick="renderExportDataPage()" class="block nav-link">Export Data</a>
                         </nav>
                         <div class="mt-8">
                              <button onclick="logout()" class="btn-primary w-full text-center">Logout</button>
                         </div>
                     </aside>
+
+                    <!-- Overlay for mobile sidebar -->
+                    <div id="admin-sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden" onclick="toggleSidebar('admin')"></div>
+
                     <!-- Main Content -->
-                    <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
-                        <div id="admin-content">
-                            <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, Admin!</h2>
-                            <p class="text-gray-600 mb-6">This is your admin dashboard. Use the navigation to manage teachers and students.</p>
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="card bg-blue-50">
-                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Manage Teachers</h3>
-                                    <p class="text-gray-600">Add, edit, or remove teacher accounts.</p>
-                                    <button onclick="renderManageTeachersPage()" class="btn-primary mt-4">Go to Page</button>
+                    <div class="flex-1 flex flex-col">
+                        <!-- Mobile menu button -->
+                        <button id="admin-menu-btn" class="md:hidden p-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 m-4 self-start">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
+                            <div id="admin-content">
+                                <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, Admin!</h2>
+                                <p class="text-gray-600 mb-6">This is your admin dashboard. Use the navigation to manage teachers and students.</p>
+                                 
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                    <div class="card bg-blue-50 text-center">
+                                        <h3 class="text-3xl font-bold text-blue-600">${totalStudents}</h3>
+                                        <p class="text-gray-600">Total Students</p>
+                                    </div>
+                                    <div class="card bg-green-50 text-center">
+                                        <h3 class="text-3xl font-bold text-green-600">${totalTeachers}</h3>
+                                        <p class="text-gray-600">Total Teachers</p>
+                                    </div>
+                                    <div class="card bg-yellow-50 text-center">
+                                        <h3 class="text-3xl font-bold text-yellow-600">${numClasses}</h3>
+                                        <p class="text-gray-600">Total Classes</p>
+                                    </div>
+                                    <div class="card bg-red-50 text-center">
+                                        <h3 class="text-3xl font-bold text-red-600">${pendingReportsCount}</h3>
+                                        <p class="text-gray-600">Students w/ Pending Reports (${currentTerm}, ${currentAcademicYear})</p>
+                                    </div>
                                 </div>
-                                <div class="card bg-blue-50">
-                                    <h3 class="text-2xl font-semibold text-blue-600 mb-2">Manage Students</h3>
-                                    <p class="text-gray-600">View, add, or remove student records.</p>
-                                    <button onclick="renderManageStudentsPage()" class="btn-primary mt-4">Go to Page</button>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">Manage Teachers</h3>
+                                        <p class="text-gray-600">Add, edit, or remove teacher accounts.</p>
+                                        <button onclick="renderManageTeachersPage()" class="btn-primary mt-4">Go to Page</button>
+                                    </div>
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">Manage Students</h3>
+                                        <p class="text-gray-600">View, add, or remove student records.</p>
+                                        <button onclick="renderManageStudentsPage()" class="btn-primary mt-4">Go to Page</button>
+                                    </div>
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">Fee Tracking</h3>
+                                        <p class="text-gray-600">Track student payments and balances.</p>
+                                        <button onclick="renderFeeTrackingPage()" class="btn-primary mt-4">Go to Page</button>
+                                    </div>
+                                    <div class="card bg-blue-50">
+                                        <h3 class="text-2xl font-semibold text-blue-600 mb-2">Top Student (${currentTerm}, ${currentAcademicYear})</h3>
+                                        ${topStudent ? `
+                                            <p class="text-gray-600"><strong>${topStudent.name}</strong> (${topStudent.class})</p>
+                                            <p class="text-gray-600">Average Score: ${topStudent.average.toFixed(2)}%</p>
+                                        ` : `
+                                            <p class="text-gray-600">No top student data for this term/year.</p>
+                                        `}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </main>
+                        </main>
+                    </div>
                 </div>
             `;
+            // Attach event listener for mobile menu button
+            document.getElementById('admin-menu-btn').addEventListener('click', () => toggleSidebar('admin'));
         };
 
         const renderManageTeachersPage = () => {
@@ -1021,6 +1512,11 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Contact</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Behavior Notes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Awards</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -1031,7 +1527,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap">${s.name}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">${s.class}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">${s.gender}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.dob || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.parentName || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${s.parentContact || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">${s.behaviorNotes || '-'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">${s.awards && s.awards.length > 0 ? s.awards.join(', ') : '-'}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            <button onclick="editStudentProfile(${index})" class="text-blue-600 hover:text-blue-900 font-semibold mr-2">Edit</button>
                                             <button onclick="deleteStudent(${index})" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
                                         </td>
                                     </tr>
@@ -1054,11 +1556,13 @@
         
         // Helper function to simulate attendance data, as there is no UI to add it.
         // In a real application, this data would be fetched from a database.
-        const getAttendanceData = () => {
+        const getAttendanceData = (studentId, year) => {
+            // This is mock data. In a real app, this would be stored per student per year/term.
+            const seed = studentId.charCodeAt(0) + year.charCodeAt(0); // Simple seed for consistent mock data
             const totalDays = 180;
-            const daysPresent = Math.floor(Math.random() * (totalDays - 170) + 170); // Random from 170 to 180
+            const daysPresent = Math.floor(Math.random(seed) * (totalDays - 170) + 170); // Random from 170 to 180
             const daysAbsent = totalDays - daysPresent;
-            const tardies = Math.floor(Math.random() * 5); // Random from 0 to 4
+            const tardies = Math.floor(Math.random(seed * 2) * 5); // Random from 0 to 4
             return { totalDays, daysPresent, daysAbsent, tardies };
         };
 
@@ -1083,6 +1587,13 @@
                             <select id="report-term-select" class="mt-1 input-field">
                                 <option value="">Select a term...</option>
                                 ${terms.map(t => `<option value="${t}">${t}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="report-year-select" class="block text-sm font-medium text-gray-700">Academic Year</label>
+                            <select id="report-year-select" class="mt-1 input-field">
+                                <option value="">Select a year...</option>
+                                ${academicYears.map(y => `<option value="${y}" ${y === currentYear.toString() ? 'selected' : ''}>${y}</option>`).join('')}
                             </select>
                         </div>
                         <div>
@@ -1118,6 +1629,7 @@
 
                 const classSelect = document.getElementById('report-class-select');
                 const termSelect = document.getElementById('report-term-select');
+                const yearSelect = document.getElementById('report-year-select');
                 const studentSelect = document.getElementById('report-student-select');
                 const generateBtn = document.getElementById('generate-report-btn');
                 const reportOutputContainer = document.getElementById('report-output-container');
@@ -1126,8 +1638,8 @@
                 const downloadIndividualBtn = document.getElementById('download-individual-btn');
 
                 // Function to generate the report HTML for a single student
-                const generateSingleReportHtml = (student, allMarks, selectedTerm, rank, totalStudents) => {
-                    const marksForStudent = allMarks.filter(m => m.studentId === student.id);
+                const generateSingleReportHtml = (student, allMarks, selectedTerm, selectedYear, rank, totalStudents, termAverages, annualAverage) => {
+                    const marksForStudent = allMarks.filter(m => m.studentId === student.id && m.year === selectedYear);
                     const subjects = [...new Set(marksForStudent.map(m => m.subject))];
                     
                     const subjectBreakdown = subjects.map(subject => {
@@ -1155,18 +1667,22 @@
                     const averageMarks = subjectBreakdown.filter(s => s.finalGrade !== '-').length > 0 ? (totalMarks / subjectBreakdown.filter(s => s.finalGrade !== '-').length) : 0;
                     const teacherComment = getTeacherComment(averageMarks);
                     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                    const attendance = getAttendanceData(); // Get mock attendance data
+                    const attendance = getAttendanceData(student.id, selectedYear); // Get mock attendance data
 
                     const reportData = {
                         ...student,
                         date: today,
+                        selectedTerm,
+                        selectedYear,
                         subjects: subjectBreakdown,
                         totalMarks: totalMarks,
                         averageMarks: averageMarks,
                         teacherComment: teacherComment,
                         rank,
                         totalStudents,
-                        attendance
+                        attendance,
+                        termAverages,
+                        annualAverage
                     };
 
                     return `
@@ -1184,8 +1700,11 @@
                                     <p><strong>Class:</strong> ${reportData.class}</p>
                                     <p><strong>Admission No:</strong> ${reportData.id}</p>
                                     <p><strong>Date:</strong> ${reportData.date}</p>
+                                    <p><strong>Term:</strong> ${reportData.selectedTerm}</p>
+                                    <p><strong>Academic Year:</strong> ${reportData.selectedYear}</p>
                                     <p><strong>Position:</strong> ${reportData.rank} of ${reportData.totalStudents}</p>
-                                    <p><strong>Average Score:</strong> ${reportData.averageMarks.toFixed(2)}%</p>
+                                    <p><strong>Term Average:</strong> ${reportData.averageMarks.toFixed(2)}%</p>
+                                    <p><strong>Annual Average:</strong> ${reportData.annualAverage.toFixed(2)}%</p>
                                 </div>
                                 
                                 <h3 class="section-title mt-8">Grades</h3>
@@ -1222,13 +1741,23 @@
                                         </ul>
                                     </div>
                                     <div>
-                                        <h3 class="section-title">Attendance</h3>
+                                        <h3 class="section-title">Attendance (${reportData.selectedYear})</h3>
                                         <ul class="list-inside space-y-1">
                                             <li><strong>Days Present:</strong> ${reportData.attendance.daysPresent}</li>
                                             <li><strong>Days Absent:</strong> ${reportData.attendance.daysAbsent}</li>
                                             <li><strong>Tardies:</strong> ${reportData.attendance.tardies}</li>
                                         </ul>
                                     </div>
+                                </div>
+
+                                <h3 class="section-title mt-8">Term Averages & Trends</h3>
+                                <div class="grid grid-cols-3 gap-4 mt-4">
+                                    ${Object.keys(reportData.termAverages).map(termKey => `
+                                        <div class="p-3 bg-gray-50 rounded-lg shadow-inner">
+                                            <p class="font-semibold">${termKey}:</p>
+                                            <p>${reportData.termAverages[termKey].toFixed(2)}%</p>
+                                        </div>
+                                    `).join('')}
                                 </div>
 
                                 <h3 class="section-title mt-8">Teacher's Comment</h3>
@@ -1251,6 +1780,7 @@
                             </div>
                             <div class="report-footer">
                                 <p class="font-bold">Prince Alex Academy</p>
+                                <p class="text-sm">Developed by Prince Alex Digital</p>
                                 <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
                             </div>
                         </div>
@@ -1276,44 +1806,15 @@
                     }
                 });
 
-                // Helper function to calculate a student's average mark for a given term
-                const calculateStudentAverage = (studentId, selectedTerm) => {
-                    const allMarks = getData('marks', []);
-                    const studentMarks = allMarks.filter(m => m.studentId === studentId && m.term === selectedTerm);
-                    
-                    const subjects = [...new Set(studentMarks.map(m => m.subject))];
-                    let totalFinalMarks = 0;
-                    let subjectCount = 0;
-
-                    subjects.forEach(subject => {
-                        const midTermMark = studentMarks.find(m => m.subject === subject && m.examType === 'Mid-Term');
-                        const endTermMark = studentMarks.find(m => m.subject === subject && m.examType === 'End of Term');
-                        const midTermScore = midTermMark ? midTermMark.marks : null;
-                        const endTermScore = endTermMark ? endTermMark.marks : null;
-                        
-                        let finalMark;
-                        if (midTermScore !== null && endTermScore !== null) {
-                            finalMark = (midTermScore + endTermScore) / 2;
-                        } else {
-                            finalMark = midTermScore || endTermScore;
-                        }
-                        if (finalMark !== null) {
-                            totalFinalMarks += finalMark;
-                            subjectCount++;
-                        }
-                    });
-
-                    return subjectCount > 0 ? totalFinalMarks / subjectCount : 0;
-                };
-
                 // Generate report preview
                 generateBtn.addEventListener('click', () => {
                     const selectedClass = classSelect.value;
                     const selectedTerm = termSelect.value;
+                    const selectedYear = yearSelect.value;
                     const selectedStudentId = studentSelect.value;
 
-                    if (!selectedClass || !selectedTerm) {
-                        alert('Please select a class and a term.');
+                    if (!selectedClass || !selectedTerm || !selectedYear) {
+                        alert('Please select a class, term, and academic year.');
                         return;
                     }
 
@@ -1322,17 +1823,16 @@
                     const classStudents = allStudents.filter(s => s.class === selectedClass);
                     const totalStudents = classStudents.length;
 
-                    // Calculate average marks and rank all students in the class
-                    const studentAverages = classStudents.map(student => ({
+                    // Calculate average marks and rank all students in the class for the selected term/year
+                    const studentAveragesTerm = classStudents.map(student => ({
                         id: student.id,
-                        average: calculateStudentAverage(student.id, selectedTerm)
-                    }));
+                        average: calculateStudentAverage(student.id, selectedTerm, selectedYear)
+                    })).filter(s => s.average > 0);
 
-                    // Sort students by average mark in descending order to determine rank
-                    studentAverages.sort((a, b) => b.average - a.average);
+                    studentAveragesTerm.sort((a, b) => b.average - a.average);
 
                     const studentRankMap = {};
-                    studentAverages.forEach((student, index) => {
+                    studentAveragesTerm.forEach((student, index) => {
                         studentRankMap[student.id] = index + 1;
                     });
 
@@ -1351,18 +1851,36 @@
                         return;
                     }
 
-                    // Check if marks exist for the selected class and term
-                    const classMarks = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm);
-                    if (classMarks.length === 0) {
-                         alert('No marks found for this class and term.');
+                    // Check if marks exist for the selected class, term and year
+                    const classMarksForTermAndYear = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm && m.year === selectedYear);
+                    if (classMarksForTermAndYear.length === 0) {
+                         alert('No marks found for this class, term, and academic year.');
                         return;
                     }
 
                     let reportHtml = '';
                     studentsToReport.forEach((student, index) => {
                         if (index > 0) reportHtml += '<div class="page-break"></div>';
-                        const rank = studentRankMap[student.id];
-                        reportHtml += generateSingleReportHtml(student, allMarks, selectedTerm, rank, totalStudents);
+                        const rank = studentRankMap[student.id] || 'N/A'; // Handle students with no marks
+                        
+                        // Calculate term-by-term averages for the annual trend
+                        const studentTermAverages = {};
+                        terms.forEach(term => {
+                            studentTermAverages[term] = calculateStudentAverage(student.id, term, selectedYear);
+                        });
+
+                        // Calculate annual average for the student
+                        let totalAnnualMarks = 0;
+                        let termsWithMarks = 0;
+                        Object.values(studentTermAverages).forEach(avg => {
+                            if (avg > 0) {
+                                totalAnnualMarks += avg;
+                                termsWithMarks++;
+                            }
+                        });
+                        const annualAverage = termsWithMarks > 0 ? totalAnnualMarks / termsWithMarks : 0;
+
+                        reportHtml += generateSingleReportHtml(student, allMarks, selectedTerm, selectedYear, rank, totalStudents, studentTermAverages, annualAverage);
                     });
                     
                     reportPreview.innerHTML = reportHtml;
@@ -1373,13 +1891,14 @@
                 printPdfBtn.onclick = () => {
                     const selectedClass = classSelect.value;
                     const selectedTerm = termSelect.value;
-                    if (!selectedClass || !selectedTerm) {
+                    const selectedYear = yearSelect.value;
+                    if (!selectedClass || !selectedTerm || !selectedYear) {
                         alert('Please generate a report first.');
                         return;
                     }
                     html2pdf().from(reportPreview).set({
                         margin: [10, 10, 10, 10],
-                        filename: `Student_Reports_${selectedClass}_${selectedTerm}.pdf`,
+                        filename: `Student_Reports_${selectedClass}_${selectedTerm}_${selectedYear}.pdf`,
                         html2canvas: { scale: 2 },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     }).save();
@@ -1389,8 +1908,9 @@
                 downloadIndividualBtn.onclick = async () => {
                     const selectedClass = classSelect.value;
                     const selectedTerm = termSelect.value;
-                    if (!selectedClass || !selectedTerm) {
-                        alert('Please select a class and a term.');
+                    const selectedYear = yearSelect.value;
+                    if (!selectedClass || !selectedTerm || !selectedYear) {
+                        alert('Please select a class, term, and academic year.');
                         return;
                     }
 
@@ -1404,20 +1924,20 @@
                         return;
                     }
                     
-                    const classMarks = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm);
-                    if (classMarks.length === 0) {
-                         alert('No marks found for this class and term.');
+                    const classMarksForTermAndYear = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm && m.year === selectedYear);
+                    if (classMarksForTermAndYear.length === 0) {
+                         alert('No marks found for this class, term, and academic year.');
                         return;
                     }
 
                     // Calculate average marks and rank all students in the class
-                    const studentAverages = studentsToDownload.map(student => ({
+                    const studentAveragesTerm = studentsToDownload.map(student => ({
                         id: student.id,
-                        average: calculateStudentAverage(student.id, selectedTerm)
-                    }));
-                    studentAverages.sort((a, b) => b.average - a.average);
+                        average: calculateStudentAverage(student.id, selectedTerm, selectedYear)
+                    })).filter(s => s.average > 0);
+                    studentAveragesTerm.sort((a, b) => b.average - a.average);
                     const studentRankMap = {};
-                    studentAverages.forEach((student, index) => {
+                    studentAveragesTerm.forEach((student, index) => {
                         studentRankMap[student.id] = index + 1;
                     });
 
@@ -1433,14 +1953,28 @@
                     downloadIndividualBtn.disabled = true;
 
                     for (const student of studentsToDownload) {
-                        const rank = studentRankMap[student.id];
-                        const reportHtml = generateSingleReportHtml(student, allMarks, selectedTerm, rank, totalStudents);
+                        const rank = studentRankMap[student.id] || 'N/A';
+                        const studentTermAverages = {};
+                        terms.forEach(term => {
+                            studentTermAverages[term] = calculateStudentAverage(student.id, term, selectedYear);
+                        });
+                        let totalAnnualMarks = 0;
+                        let termsWithMarks = 0;
+                        Object.values(studentTermAverages).forEach(avg => {
+                            if (avg > 0) {
+                                totalAnnualMarks += avg;
+                                termsWithMarks++;
+                            }
+                        });
+                        const annualAverage = termsWithMarks > 0 ? totalAnnualMarks / termsWithMarks : 0;
+
+                        const reportHtml = generateSingleReportHtml(student, allMarks, selectedTerm, selectedYear, rank, totalStudents, studentTermAverages, annualAverage);
                         const tempElement = document.createElement('div');
                         tempElement.innerHTML = reportHtml;
 
                         await html2pdf().from(tempElement).set({
                             margin: [10, 10, 10, 10],
-                            filename: `Report_${student.name.replace(/\s/g, '_')}_${selectedTerm}.pdf`,
+                            filename: `Report_${student.name.replace(/\s/g, '_')}_${selectedTerm}_${selectedYear}.pdf`,
                             html2canvas: { scale: 2 },
                             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                         }).save();
@@ -1455,6 +1989,442 @@
                 };
             }
         };
+
+        const renderFeeTrackingPage = () => {
+            const students = getData('students', []);
+            const fees = getData('fees', []);
+            const terms = ['Term 1', 'Term 2', 'Term 3'];
+            const contentDiv = document.getElementById('admin-content');
+
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Fee Tracking</h2>
+                    <div class="card bg-gray-50 p-4 mb-6">
+                        <h3 class="text-xl font-bold mb-4">Record New Payment</h3>
+                        <form id="record-payment-form" class="space-y-4">
+                            <div>
+                                <label for="fee-student-select" class="block text-sm font-medium text-gray-700">Student</label>
+                                <select id="fee-student-select" class="input-field mt-1" required>
+                                    <option value="">Select Student</option>
+                                    ${students.map(s => `<option value="${s.id}">${s.name} (${s.class})</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="fee-term-select" class="block text-sm font-medium text-gray-700">Term</label>
+                                <select id="fee-term-select" class="input-field mt-1" required>
+                                    <option value="">Select Term</option>
+                                    ${terms.map(t => `<option value="${t}">${t}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="fee-year-select" class="block text-sm font-medium text-gray-700">Academic Year</label>
+                                <select id="fee-year-select" class="input-field mt-1" required>
+                                    <option value="">Select Year</option>
+                                    ${academicYears.map(y => `<option value="${y}" ${y === currentYear.toString() ? 'selected' : ''}>${y}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="amount-due" class="block text-sm font-medium text-gray-700">Amount Due</label>
+                                <input type="number" id="amount-due" class="input-field mt-1" min="0" required>
+                            </div>
+                            <div>
+                                <label for="amount-paid" class="block text-sm font-medium text-gray-700">Amount Paid</label>
+                                <input type="number" id="amount-paid" class="input-field mt-1" min="0" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Record Payment</button>
+                        </form>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Payment Records</h3>
+                    <div class="marks-list-container mt-6">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Due</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Paid</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fee-records-table-body" class="bg-white divide-y divide-gray-200">
+                                ${fees.map((f, index) => {
+                                    const student = students.find(s => s.id === f.studentId);
+                                    const balance = f.amountDue - f.amountPaid;
+                                    let statusColor = '';
+                                    if (f.status === 'Paid') statusColor = 'text-green-600';
+                                    else if (f.status === 'Partial') statusColor = 'text-yellow-600';
+                                    else if (f.status === 'Pending') statusColor = 'text-red-600';
+
+                                    return `
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">${student ? student.name : 'Unknown'}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">${f.term}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">${f.year}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">$${f.amountDue.toLocaleString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">$${f.amountPaid.toLocaleString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">$${balance.toLocaleString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap ${statusColor}">${f.status}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">${f.date || '-'}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <button onclick="editFeeRecord(${index})" class="text-blue-600 hover:text-blue-900 font-semibold mr-2">Edit</button>
+                                                <button onclick="deleteFeeRecord(${index})" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('record-payment-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    recordPayment();
+                });
+            }
+        };
+
+        const recordPayment = () => {
+            const studentId = document.getElementById('fee-student-select').value;
+            const term = document.getElementById('fee-term-select').value;
+            const year = document.getElementById('fee-year-select').value;
+            const amountDue = parseFloat(document.getElementById('amount-due').value);
+            const amountPaid = parseFloat(document.getElementById('amount-paid').value);
+            const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+            if (!studentId || !term || !year || isNaN(amountDue) || isNaN(amountPaid)) {
+                alert('Please fill in all payment details with valid numbers.');
+                return;
+            }
+
+            if (amountPaid > amountDue) {
+                alert('Amount paid cannot exceed amount due.');
+                return;
+            }
+
+            let status = 'Pending';
+            if (amountPaid === amountDue) {
+                status = 'Paid';
+            } else if (amountPaid > 0 && amountPaid < amountDue) {
+                status = 'Partial';
+            }
+
+            const allFees = getData('fees', []);
+            // Check if a record for this student, term, and year already exists
+            const existingIndex = allFees.findIndex(f => f.studentId === studentId && f.term === term && f.year === year);
+
+            if (existingIndex !== -1) {
+                // Update existing record
+                allFees[existingIndex] = { ...allFees[existingIndex], amountPaid: amountPaid, status: status, date: date };
+            } else {
+                // Add new record
+                allFees.push({ studentId, term, year, amountDue, amountPaid, status, date });
+            }
+            
+            setData('fees', allFees);
+            alert('Payment recorded successfully!');
+            renderFeeTrackingPage(); // Refresh the page
+        };
+
+        window.editFeeRecord = (index) => {
+            let allFees = getData('fees', []);
+            const feeRecord = allFees[index];
+            const students = getData('students', []);
+            const student = students.find(s => s.id === feeRecord.studentId);
+
+            const newAmountPaid = prompt(`Enter new amount paid for ${student.name} (${feeRecord.term}, ${feeRecord.year}). Current paid: $${feeRecord.amountPaid.toLocaleString()}:`, feeRecord.amountPaid);
+            
+            if (newAmountPaid !== null && !isNaN(newAmountPaid) && parseFloat(newAmountPaid) >= 0) {
+                const updatedAmountPaid = parseFloat(newAmountPaid);
+                let newStatus = 'Pending';
+                if (updatedAmountPaid === feeRecord.amountDue) {
+                    newStatus = 'Paid';
+                } else if (updatedAmountPaid > 0 && updatedAmountPaid < feeRecord.amountDue) {
+                    newStatus = 'Partial';
+                }
+
+                feeRecord.amountPaid = updatedAmountPaid;
+                feeRecord.status = newStatus;
+                feeRecord.date = new Date().toISOString().slice(0, 10); // Update date on edit
+
+                setData('fees', allFees);
+                alert('Fee record updated successfully!');
+                renderFeeTrackingPage();
+            } else if (newAmountPaid !== null) {
+                alert('Invalid input. Please enter a valid non-negative number.');
+            }
+        };
+
+        window.deleteFeeRecord = (index) => {
+            if (confirm('Are you sure you want to delete this fee record?')) {
+                let allFees = getData('fees', []);
+                allFees.splice(index, 1);
+                setData('fees', allFees);
+                alert('Fee record deleted successfully!');
+                renderFeeTrackingPage();
+            }
+        };
+
+        const renderFileUploadPage = () => {
+            const uploadedFiles = getData('files', []);
+            const contentDiv = document.getElementById('teacher-content') || document.getElementById('admin-content'); // Can be accessed by both roles
+
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">File Uploads (Mock)</h2>
+                    <div class="card bg-gray-50 p-4 mb-6">
+                        <p class="text-red-600 mb-4 font-semibold">Note: This is a mock file upload. Files will not be permanently stored on a server, only their names/metadata will be "recorded" in your browser's local storage for demonstration purposes.</p>
+                        <form id="file-upload-form" class="space-y-4">
+                            <div>
+                                <label for="file-input" class="block text-sm font-medium text-gray-700">Select File</label>
+                                <input type="file" id="file-input" class="input-field mt-1" required>
+                            </div>
+                            <div>
+                                <label for="file-description" class="block text-sm font-medium text-gray-700">Description</label>
+                                <input type="text" id="file-description" class="input-field mt-1" placeholder="e.g., Math Assignment 1, School Notice" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Upload File (Mock)</button>
+                        </form>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Uploaded Files (Mock Records)</h3>
+                    <div class="marks-list-container mt-6">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="uploaded-files-table-body" class="bg-white divide-y divide-gray-200">
+                                ${uploadedFiles.map((f, index) => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${f.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${f.description}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${f.date}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button onclick="deleteMockFile(${index})" class="text-red-600 hover:text-red-900 font-semibold">Delete Record</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('file-upload-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fileInput = document.getElementById('file-input');
+                    const fileDescription = document.getElementById('file-description').value;
+                    const file = fileInput.files[0];
+
+                    if (!file || !fileDescription) {
+                        alert('Please select a file and provide a description.');
+                        return;
+                    }
+
+                    const newFileRecord = {
+                        name: file.name,
+                        description: fileDescription,
+                        date: new Date().toISOString().slice(0, 10)
+                    };
+
+                    const currentFiles = getData('files', []);
+                    setData('files', [...currentFiles, newFileRecord]);
+                    alert('File record "uploaded" successfully (mock)!');
+                    renderFileUploadPage();
+                });
+
+                window.deleteMockFile = (index) => {
+                    if (confirm('Are you sure you want to delete this file record?')) {
+                        let currentFiles = getData('files', []);
+                        currentFiles.splice(index, 1);
+                        setData('files', currentFiles);
+                        alert('File record deleted!');
+                        renderFileUploadPage();
+                    }
+                };
+            }
+        };
+
+        const renderExportDataPage = () => {
+            const contentDiv = document.getElementById('admin-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Export Data</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card bg-blue-50">
+                            <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Students</h3>
+                            <p class="text-gray-600">Download all student records as a CSV file.</p>
+                            <button onclick="exportStudentsCsv()" class="btn-primary mt-4">Export Students CSV</button>
+                        </div>
+                        <div class="card bg-blue-50">
+                            <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Grades</h3>
+                            <p class="text-gray-600">Download all student marks as a CSV file.</p>
+                            <button onclick="exportGradesCsv()" class="btn-primary mt-4">Export Grades CSV</button>
+                        </div>
+                        <div class="card bg-blue-50">
+                            <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Report Summaries</h3>
+                            <p class="text-gray-600">Download summaries of all generated reports as a CSV file.</p>
+                            <button onclick="exportReportSummariesCsv()" class="btn-primary mt-4">Export Report Summaries CSV</button>
+                        </div>
+                        <div class="card bg-blue-50">
+                            <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Fee Records</h3>
+                            <p class="text-gray-600">Download all fee payment records as a CSV file.</p>
+                            <button onclick="exportFeesCsv()" class="btn-primary mt-4">Export Fee Records CSV</button>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        const downloadCsv = (filename, data) => {
+            const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) { // feature detection
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert(`${filename} downloaded successfully!`);
+            } else {
+                alert('Your browser does not support downloading files directly. Please copy the data manually.');
+            }
+        };
+
+        window.exportStudentsCsv = () => {
+            const students = getData('students', []);
+            if (students.length === 0) {
+                alert('No student data to export.');
+                return;
+            }
+            const headers = ['Admission No.', 'Student Name', 'Class', 'Gender', 'Date of Birth (YYYY-MM-DD)', 'Parent/Guardian Name', 'Parent/Guardian Contact', 'Behavior Notes', 'Awards'];
+            const csvRows = [
+                headers.join(','),
+                ...students.map(s => [
+                    s.id,
+                    s.name,
+                    s.class,
+                    s.gender,
+                    s.dob || '',
+                    s.parentName || '',
+                    s.parentContact || '',
+                    `"${s.behaviorNotes ? s.behaviorNotes.replace(/"/g, '""') : ''}"`, // Enclose notes in quotes
+                    `"${s.awards && s.awards.length > 0 ? s.awards.join('; ').replace(/"/g, '""') : ''}"` // Enclose awards in quotes
+                ].join(','))
+            ];
+            downloadCsv('students.csv', csvRows.join('\n'));
+        };
+
+        window.exportGradesCsv = () => {
+            const marks = getData('marks', []);
+            if (marks.length === 0) {
+                alert('No grades data to export.');
+                return;
+            }
+            const headers = ['Student ID', 'Student Name', 'Class', 'Subject', 'Term', 'Year', 'Exam Type', 'Marks', 'Teacher'];
+            const csvRows = [
+                headers.join(','),
+                ...marks.map(m => [
+                    m.studentId,
+                    m.studentName,
+                    m.class,
+                    m.subject,
+                    m.term,
+                    m.year,
+                    m.examType,
+                    m.marks,
+                    m.teacher
+                ].join(','))
+            ];
+            downloadCsv('grades.csv', csvRows.join('\n'));
+        };
+
+        window.exportReportSummariesCsv = () => {
+            const students = getData('students', []);
+            const marks = getData('marks', []);
+            const terms = ['Term 1', 'Term 2', 'Term 3'];
+            
+            if (students.length === 0 || marks.length === 0) {
+                alert('Not enough data to export report summaries. Ensure students and marks exist.');
+                return;
+            }
+
+            const headers = ['Student ID', 'Student Name', 'Class', 'Academic Year', 'Term 1 Average', 'Term 2 Average', 'Term 3 Average', 'Annual Average'];
+            const csvRows = [headers.join(',')];
+
+            students.forEach(student => {
+                academicYears.forEach(year => {
+                    const studentTermAverages = {};
+                    let totalAnnualMarks = 0;
+                    let termsWithMarks = 0;
+
+                    terms.forEach(term => {
+                        const avg = calculateStudentAverage(student.id, term, year);
+                        studentTermAverages[`Term ${term.split(' ')[1]} Average`] = avg > 0 ? avg.toFixed(2) : '-';
+                        if (avg > 0) {
+                            totalAnnualMarks += avg;
+                            termsWithMarks++;
+                        }
+                    });
+                    const annualAverage = termsWithMarks > 0 ? (totalAnnualMarks / termsWithMarks).toFixed(2) : '-';
+
+                    csvRows.push([
+                        student.id,
+                        student.name,
+                        student.class,
+                        year,
+                        studentTermAverages['Term 1 Average'],
+                        studentTermAverages['Term 2 Average'],
+                        studentTermAverages['Term 3 Average'],
+                        annualAverage
+                    ].join(','));
+                });
+            });
+            downloadCsv('report_summaries.csv', csvRows.join('\n'));
+        };
+
+        window.exportFeesCsv = () => {
+            const fees = getData('fees', []);
+            const students = getData('students', []);
+            if (fees.length === 0) {
+                alert('No fee records to export.');
+                return;
+            }
+
+            const headers = ['Student ID', 'Student Name', 'Term', 'Year', 'Amount Due', 'Amount Paid', 'Balance', 'Status', 'Date'];
+            const csvRows = [
+                headers.join(','),
+                ...fees.map(f => {
+                    const student = students.find(s => s.id === f.studentId);
+                    const studentName = student ? student.name : 'Unknown';
+                    const balance = f.amountDue - f.amountPaid;
+                    return [
+                        f.studentId,
+                        studentName,
+                        f.term,
+                        f.year,
+                        f.amountDue,
+                        f.amountPaid,
+                        balance,
+                        f.status,
+                        f.date || ''
+                    ].join(',');
+                })
+            ];
+            downloadCsv('fee_records.csv', csvRows.join('\n'));
+        };
+
 
         // --- Main Application Flow Control ---
         const renderPage = () => {
