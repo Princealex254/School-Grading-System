@@ -248,28 +248,20 @@
 
         const appContainer = document.getElementById('app-container');
 
-        // Function to handle login
-        const login = (role, credentials) => {
-            let user = null;
+        // Function to handle login (modified for direct sign-in)
+        const login = (role) => {
+            let user = {};
             if (role === 'teacher') {
-                const teachers = getData('teachers', []);
-                // This logic allows any new teacher added by the admin to log in.
-                user = teachers.find(t => t.username === credentials.username && t.password === credentials.password);
+                // For demo, just set a dummy teacher session
+                user = { username: 'demo.teacher', name: 'Demo Teacher', role: 'teacher' };
             } else if (role === 'admin') {
-                const admin = getData('admin', {});
-                if (admin.username === credentials.username && admin.password === credentials.password) {
-                    user = { username: admin.username, name: 'Admin', role: 'admin' };
-                }
+                // For demo, just set a dummy admin session
+                user = { username: 'admin', name: 'Admin User', role: 'admin' };
             }
 
-            if (user) {
-                setData('session', { username: user.username, name: user.name, role: role });
-                renderPage();
-                return true;
-            } else {
-                alert('Invalid username or password.');
-                return false;
-            }
+            setData('session', user);
+            renderPage();
+            return true;
         };
 
         // Function to handle logout
@@ -283,51 +275,43 @@
         // Render the landing page
         const renderLandingPage = () => {
             appContainer.innerHTML = `
-                <div class="flex items-center justify-center min-h-screen">
-                    <div class="card max-w-2xl text-center">
-                        <img src="logo.png" alt="School Logo" class="mx-auto mb-6 w-24 h-24 rounded-full">
-                        <h1 class="text-4xl md:text-5xl font-bold text-blue-600 mb-4">Prince Alex Academy Grading System</h1>
-                        <p class="text-lg md:text-xl text-gray-600 mb-8">
-                            Welcome to the Student Grading Management System. Please choose your role to log in.
+                <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-400 to-indigo-600 p-4">
+                    <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-3xl w-full text-center transform transition-all duration-300 hover:scale-105">
+                        <img src="logo.png" alt="School Logo" class="mx-auto mb-8 w-32 h-32 rounded-full border-4 border-blue-200 shadow-lg">
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-gray-800 mb-4 leading-tight">
+                            Prince Alex Academy
+                            <span class="block text-blue-600 text-4xl md:text-5xl mt-2">Grading System</span>
+                        </h1>
+                        <p class="text-xl md:text-2xl text-gray-600 mb-10 font-light">
+                            Empowering educators and students through seamless grade management.
                         </p>
-                        <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-                            <button onclick="renderLoginPage('teacher')" class="btn-primary w-full md:w-auto">Teacher Login</button>
-                            <button onclick="renderLoginPage('admin')" class="btn-primary w-full md:w-auto">Admin Login</button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <button onclick="login('teacher')" class="group flex flex-col items-center justify-center p-6 bg-blue-500 text-white rounded-xl shadow-lg hover:bg-blue-600 transform hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-3 text-blue-100 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h-5v-2a3 3 0 013-3h2a3 3 0 013 3v2h-5z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v1m0 4v1m-4-7h1m4 0h1m-7 4h1m4 0h1m-7 4h1m4 0h1" />
+                                </svg>
+                                <span class="text-3xl font-bold">Teacher</span>
+                                <span class="text-lg mt-1 opacity-90">Manage Grades & Reports</span>
+                            </button>
+                            <button onclick="login('admin')" class="group flex flex-col items-center justify-center p-6 bg-indigo-500 text-white rounded-xl shadow-lg hover:bg-indigo-600 transform hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-3 text-indigo-100 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.055 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.001 12.001 0 002 12c0 2.757 1.125 5.225 2.938 7.072M12 21.025V14" />
+                                </svg>
+                                <span class="text-3xl font-bold">Admin</span>
+                                <span class="text-lg mt-1 opacity-90">System & User Management</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
         };
 
-        // Render the login page for a specific role
+        // Render the login page for a specific role (now directly logs in)
         const renderLoginPage = (role) => {
-            appContainer.innerHTML = `
-                <div class="flex items-center justify-center min-h-screen">
-                    <div class="card max-w-md w-full">
-                        <h2 class="text-3xl font-bold text-center text-blue-600 mb-6">${role === 'teacher' ? 'Teacher' : 'Admin'} Login</h2>
-                        <form id="login-form" class="space-y-4">
-                            <div>
-                                <label for="username" class="block text-sm font-medium text-gray-700">Username/Email</label>
-                                <input type="text" id="username" name="username" class="mt-1 input-field" required>
-                            </div>
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                                <input type="password" id="password" name="password" class="mt-1 input-field" required>
-                            </div>
-                            <button type="submit" class="btn-primary w-full">Login</button>
-                        </form>
-                        <p class="mt-4 text-center">
-                            <a href="#" onclick="renderLandingPage()" class="text-blue-500 hover:text-blue-700 font-medium">Back to Home</a>
-                        </p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('login-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const username = e.target.username.value;
-                const password = e.target.password.value;
-                login(role, { username, password });
-            });
+            // Directly call login function as per the new requirement
+            login(role);
         };
 
         // Render the teacher dashboard
