@@ -1431,7 +1431,7 @@
 
             // Calculate pending reports (simple logic: any student without an "End of Term" mark for current term/year)
             const studentsWithEndOfTermMarks = new Set(marks.filter(m => m.examType === 'End of Term' && m.term === currentTerm && m.year === currentAcademicYear).map(m => m.studentId));
-            const pendingReportsCount = students.filter(s => !studentsWithEndOfTermMarks.has(s.id)).length;
+            const pendingReportsCount = students.filter(s => !studentsWithEndOfEndOfTermMarks.has(s.id)).length;
 
             appContainer.innerHTML = `
                 <div class="flex flex-col md:flex-row min-h-screen bg-blue-50">
@@ -1805,7 +1805,7 @@
 
                     return `
                         <div class="report-container shadow-2xl rounded-lg">
-                            ${getReportHeaderHtml()}
+                            ${getReportHeaderHtml("Prince Alex Academy Report Form")}
                             
                             <div class="p-6">
                                 <h3 class="section-title">Student Information</h3>
@@ -2369,12 +2369,12 @@
             }
         };
 
-        // Reusable Header HTML for PDF Reports
-        const getReportHeaderHtml = () => {
+        // Reusable Header HTML for PDF Reports, now accepts a title
+        const getReportHeaderHtml = (title) => {
             return `
                 <div class="report-header">
                     <img src="logo.png" alt="School Logo" class="mx-auto">
-                    <h1 class="font-bold text-white">Prince Alex Academy Report Form</h1>
+                    <h1 class="font-bold text-white">${title}</h1>
                     <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
                 </div>
             `;
@@ -2423,12 +2423,12 @@
             }
         };
 
-        // Generic PDF export function with header/footer
-        const downloadPdfWithHeaderFooter = async (filename, contentHtml) => {
+        // Generic PDF export function with header/footer, now accepts headerTitle
+        const downloadPdfWithHeaderFooter = async (filename, contentHtml, headerTitle) => {
             const tempElement = document.createElement('div');
             tempElement.innerHTML = `
                 <div class="report-container">
-                    ${getReportHeaderHtml()}
+                    ${getReportHeaderHtml(headerTitle)}
                     <div style="padding: 2rem;">
                         ${contentHtml}
                     </div>
@@ -2483,7 +2483,7 @@
                     </tbody>
                 </table>
             `;
-            await downloadPdfWithHeaderFooter('students_list.pdf', tableHtml);
+            await downloadPdfWithHeaderFooter('students_list.pdf', tableHtml, 'Prince Alex Academy Student List');
         };
 
         window.exportGradesPdf = async () => {
@@ -2521,7 +2521,7 @@
                     </tbody>
                 </table>
             `;
-            await downloadPdfWithHeaderFooter('grades_list.pdf', tableHtml);
+            await downloadPdfWithHeaderFooter('grades_list.pdf', tableHtml, 'Prince Alex Academy Grades List');
         };
 
         window.exportReportSummariesPdf = async () => {
@@ -2586,7 +2586,7 @@
                     </tbody>
                 </table>
             `;
-            await downloadPdfWithHeaderFooter('report_summaries.pdf', tableHtml);
+            await downloadPdfWithHeaderFooter('report_summaries.pdf', tableHtml, 'Prince Alex Academy Report Summaries');
         };
 
         window.exportFeesPdf = async () => {
@@ -2633,7 +2633,7 @@
                     </tbody>
                 </table>
             `;
-            await downloadPdfWithHeaderFooter('fee_records.pdf', tableHtml);
+            await downloadPdfWithHeaderFooter('fee_records.pdf', tableHtml, 'Prince Alex Academy Fee Records');
         };
 
         const renderTeacherFeeTrackingPage = () => {
@@ -2786,7 +2786,7 @@
                     </div>
                 </div>
             `;
-            await downloadPdfWithHeaderFooter(`Fee_Statement_${student.name.replace(/\s/g, '_')}_${selectedYear || 'All_Years'}.pdf`, contentHtml);
+            await downloadPdfWithHeaderFooter(`Fee_Statement_${student.name.replace(/\s/g, '_')}_${selectedYear || 'All_Years'}.pdf`, contentHtml, 'Prince Alex Academy Fees Statement');
         };
 
 
