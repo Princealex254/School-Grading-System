@@ -1431,7 +1431,7 @@
 
             // Calculate pending reports (simple logic: any student without an "End of Term" mark for current term/year)
             const studentsWithEndOfTermMarks = new Set(marks.filter(m => m.examType === 'End of Term' && m.term === currentTerm && m.year === currentAcademicYear).map(m => m.studentId));
-            const pendingReportsCount = students.filter(s => !studentsWithEndOfEndOfTermMarks.has(s.id)).length;
+            const pendingReportsCount = students.filter(s => !studentsWithEndOfTermMarks.has(s.id)).length;
 
             appContainer.innerHTML = `
                 <div class="flex flex-col md:flex-row min-h-screen bg-blue-50">
