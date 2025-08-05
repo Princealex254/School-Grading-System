@@ -151,6 +151,40 @@
     <!-- Main application container -->
     <div id="app-container" class="container mx-auto p-4 md:p-8"></div>
 
+    <!-- Hamburger Button -->
+    <button id="menuToggleBtn" class="md:hidden fixed top-4 left-4 z-50 text-white bg-gray-800 p-2 rounded">
+        <!-- Hamburger icon -->
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+    <!-- Slide-in Side Menu -->
+    <div id="sideMenu" class="fixed top-0 left-0 w-64 h-full bg-[#1e1e1e] text-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+        <div class="p-4 flex justify-between items-center">
+            <span class="text-lg font-semibold">Menu</span>
+            <button id="menuCloseBtn" class="text-white hover:text-red-400 text-xl">✕</button>
+        </div>
+        <ul id="sideMenuUl" class="flex flex-col space-y-6 p-6 text-lg">
+            <!-- Menu items will be dynamically loaded here by JavaScript -->
+        </ul>
+    </div>
+
+    <!-- Custom Modal for Alerts and Confirmations -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-700 mb-6"></p>
+            <div id="modal-buttons" class="flex justify-end space-x-4">
+                <!-- Buttons will be injected here -->
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Helper Functions and Initial Data Setup ---
 
@@ -300,17 +334,6 @@
             renderPage();
         };
 
-        // Function to toggle sidebar visibility
-        const toggleSidebar = (role) => {
-            const sidebar = document.getElementById(`${role}-sidebar`);
-            const overlay = document.getElementById(`${role}-sidebar-overlay`);
-            
-            if (sidebar && overlay) {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('hidden');
-            }
-        };
-
         // Helper to calculate average marks for a student for a given term/year
         const calculateStudentAverage = (studentId, term, year) => {
             const allMarks = getData('marks', []);
@@ -340,6 +363,113 @@
 
             return subjectCount > 0 ? totalFinalMarks / subjectCount : 0;
         };
+
+        // --- Custom Modal Functions ---
+        let modalCallback = null;
+
+        const showModal = (title, message, type, callback = null) => {
+            const modal = document.getElementById('custom-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalButtons = document.getElementById('modal-buttons');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalButtons.innerHTML = ''; // Clear previous buttons
+            modalCallback = callback;
+
+            if (type === 'alert') {
+                const okButton = document.createElement('button');
+                okButton.textContent = 'OK';
+                okButton.className = 'btn-primary';
+                okButton.onclick = hideModal;
+                modalButtons.appendChild(okButton);
+            } else if (type === 'confirm') {
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.className = 'btn-primary bg-gray-500 hover:bg-gray-600';
+                cancelButton.onclick = () => {
+                    if (modalCallback) modalCallback(false);
+                    hideModal();
+                };
+                modalButtons.appendChild(cancelButton);
+
+                const confirmButton = document.createElement('button');
+                confirmButton.textContent = 'Confirm';
+                confirmButton.className = 'btn-primary';
+                confirmButton.onclick = () => {
+                    if (modalCallback) modalCallback(true);
+                    hideModal();
+                };
+                modalButtons.appendChild(confirmButton);
+            }
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // Prevent scrolling
+        };
+
+        const hideModal = () => {
+            const modal = document.getElementById('custom-modal');
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden'); // Re-enable scrolling
+            modalCallback = null; // Clear callback
+        };
+
+        // --- Slide-in Menu Functions ---
+        const toggleBtn = document.getElementById('menuToggleBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        const overlay = document.getElementById('menuOverlay');
+        const closeBtn = document.getElementById('menuCloseBtn');
+
+        function openMenu() {
+            sideMenu.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeMenu() {
+            sideMenu.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // Event listeners for the new hamburger menu
+        toggleBtn.addEventListener('click', openMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
+
+        // Function to update the content of the slide-in side menu based on role
+        const updateSideMenuContent = (role) => {
+            const sideMenuUl = document.getElementById('sideMenuUl');
+            if (!sideMenuUl) return;
+
+            let menuItemsHtml = '';
+            if (role === 'teacher') {
+                menuItemsHtml = `
+                    <li><a href="#" onclick="renderTeacherDashboard(); closeMenu();" class="hover:text-yellow-400">Dashboard</a></li>
+                    <li><a href="#" onclick="renderEnterMarksPage(); closeMenu();" class="hover:text-yellow-400">Enter Marks</a></li>
+                    <li><a href="#" onclick="renderViewEditMarksPage(); closeMenu();" class="hover:text-yellow-400">View/Edit Marks</a></li>
+                    <li><a href="#" onclick="renderStudentPerformancePage(); closeMenu();" class="hover:text-yellow-400">Student Performance</a></li>
+                    <li><a href="#" onclick="renderAddStudentPage(); closeMenu();" class="hover:text-yellow-400">Add Student</a></li>
+                    <li><a href="#" onclick="renderManageStudentProfilesPage(); closeMenu();" class="hover:text-yellow-400">Manage Student Profiles</a></li>
+                    <li><a href="#" onclick="renderGenerateReportsPage(); closeMenu();" class="hover:text-yellow-400">Generate Reports</a></li>
+                    <li><a href="#" onclick="renderFileUploadPage(); closeMenu();" class="hover:text-yellow-400">File Uploads</a></li>
+                    <li><a href="#" onclick="renderTeacherFeeTrackingPage(); closeMenu();" class="hover:text-yellow-400">Fee Tracking</a></li>
+                    <li><a href="#" onclick="logout(); closeMenu();" class="hover:text-yellow-400">Logout</a></li>
+                `;
+            } else if (role === 'admin') {
+                menuItemsHtml = `
+                    <li><a href="#" onclick="renderAdminDashboard(); closeMenu();" class="hover:text-yellow-400">Dashboard</a></li>
+                    <li><a href="#" onclick="renderManageTeachersPage(); closeMenu();" class="hover:text-yellow-400">Manage Teachers</a></li>
+                    <li><a href="#" onclick="renderManageStudentsPage(); closeMenu();" class="hover:text-yellow-400">Manage Students</a></li>
+                    <li><a href="#" onclick="renderFeeTrackingPage(); closeMenu();" class="hover:text-yellow-400">Fee Tracking</a></li>
+                    <li><a href="#" onclick="renderFileUploadPage(); closeMenu();" class="hover:text-yellow-400">File Uploads</a></li>
+                    <li><a href="#" onclick="renderExportDataPage(); closeMenu();" class="hover:text-yellow-400">Export Data</a></li>
+                    <li><a href="#" onclick="logout(); closeMenu();" class="hover:text-yellow-400">Logout</a></li>
+                `;
+            }
+            sideMenuUl.innerHTML = menuItemsHtml;
+        };
+
 
         // --- Page Rendering Functions ---
 
@@ -420,23 +550,15 @@
                             <a href="#" onclick="renderManageStudentProfilesPage()" class="block nav-link">Manage Student Profiles</a>
                             <a href="#" onclick="renderGenerateReportsPage()" class="block nav-link">Generate Reports</a>
                             <a href="#" onclick="renderFileUploadPage()" class="block nav-link">File Uploads</a>
+                            <a href="#" onclick="renderTeacherFeeTrackingPage()" class="block nav-link">Fee Tracking</a>
                         </nav>
                         <div class="mt-8">
                              <button onclick="logout()" class="btn-primary w-full text-center">Logout</button>
                         </div>
                     </aside>
 
-                    <!-- Overlay for mobile sidebar -->
-                    <div id="teacher-sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden" onclick="toggleSidebar('teacher')"></div>
-
                     <!-- Main Content Area -->
                     <div class="flex-1 flex flex-col">
-                        <!-- Mobile menu button -->
-                        <button id="teacher-menu-btn" class="md:hidden p-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 m-4 self-start">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
                         <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
                             <div id="teacher-content">
                                 <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, ${session.name}!</h2>
@@ -492,8 +614,7 @@
                     </div>
                 </div>
             `;
-            // Attach event listener for mobile menu button
-            document.getElementById('teacher-menu-btn').addEventListener('click', () => toggleSidebar('teacher'));
+            updateSideMenuContent('teacher'); // Update mobile menu for teacher
         };
         
         const renderAddStudentPage = () => {
@@ -579,7 +700,7 @@
             const awards = studentData ? studentData.awards : document.getElementById('awards').value.split(',').map(a => a.trim()).filter(a => a);
 
             if (!id || !name || !studentClass || !gender) {
-                alert('Please fill in all required student details (Admission No., Name, Class, Gender).');
+                showModal('Input Error', 'Please fill in all required student details (Admission No., Name, Class, Gender).', 'alert');
                 return;
             }
 
@@ -587,13 +708,13 @@
             const newStudent = { id, name, class: studentClass, gender, dob, parentName, parentContact, behaviorNotes, awards };
 
             if (allStudents.some(s => s.id === id)) {
-                alert(`A student with Admission No. ${id} already exists. Skipping this entry.`);
+                showModal('Duplicate Entry', `A student with Admission No. ${id} already exists. Skipping this entry.`, 'alert');
                 return;
             }
 
             setData('students', [...allStudents, newStudent]);
             if (redirect) {
-                alert('Student added successfully!');
+                showModal('Success', 'Student added successfully!', 'alert');
                 renderPage(); // Reloads to the correct dashboard and shows the updated list
             }
             return true; // Indicate success for CSV import
@@ -604,7 +725,7 @@
             const file = fileInput.files[0];
 
             if (!file) {
-                alert('Please select a CSV file to upload.');
+                showModal('File Error', 'Please select a CSV file to upload.', 'alert');
                 return;
             }
 
@@ -613,7 +734,7 @@
                 const text = e.target.result;
                 const lines = text.split('\n').filter(line => line.trim() !== '');
                 if (lines.length === 0) {
-                    alert('CSV file is empty.');
+                    showModal('File Error', 'CSV file is empty.', 'alert');
                     return;
                 }
 
@@ -621,7 +742,7 @@
                 const expectedHeaders = ['Admission No.', 'Student Name', 'Class', 'Gender', 'Date of Birth (YYYY-MM-DD)', 'Parent/Guardian Name', 'Parent/Guardian Contact', 'Behavior Notes', 'Awards (comma-separated)'];
 
                 if (headers.length !== expectedHeaders.length || !expectedHeaders.every(h => headers.includes(h))) {
-                    alert('CSV headers do not match the expected format. Please ensure you have: ' + expectedHeaders.join(', '));
+                    showModal('CSV Format Error', 'CSV headers do not match the expected format. Please ensure you have: ' + expectedHeaders.join(', '), 'alert');
                     return;
                 }
 
@@ -653,30 +774,32 @@
                         studentsAdded++;
                     }
                 }
-                alert(`${studentsAdded} students imported successfully!`);
+                showModal('Import Success', `${studentsAdded} students imported successfully!`, 'alert');
                 renderManageStudentsPage(); // Refresh the student list
             };
             reader.readAsText(file);
         };
 
         window.deleteStudent = (index) => {
-            if (confirm('Are you sure you want to delete this student? All their marks and fees records will be lost.')) {
-                let allStudents = getData('students', []);
-                const deletedStudentId = allStudents[index].id;
-                allStudents.splice(index, 1);
-                setData('students', allStudents);
-                // Also delete marks associated with this student
-                let allMarks = getData('marks', []);
-                const remainingMarks = allMarks.filter(mark => mark.studentId !== deletedStudentId);
-                setData('marks', remainingMarks);
-                // Also delete fees associated with this student
-                let allFees = getData('fees', []);
-                const remainingFees = allFees.filter(fee => fee.studentId !== deletedStudentId);
-                setData('fees', remainingFees);
+            showModal('Confirm Deletion', 'Are you sure you want to delete this student? All their marks and fees records will be lost.', 'confirm', (result) => {
+                if (result) {
+                    let allStudents = getData('students', []);
+                    const deletedStudentId = allStudents[index].id;
+                    allStudents.splice(index, 1);
+                    setData('students', allStudents);
+                    // Also delete marks associated with this student
+                    let allMarks = getData('marks', []);
+                    const remainingMarks = allMarks.filter(mark => mark.studentId !== deletedStudentId);
+                    setData('marks', remainingMarks);
+                    // Also delete fees associated with this student
+                    let allFees = getData('fees', []);
+                    const remainingFees = allFees.filter(fee => fee.studentId !== deletedStudentId);
+                    setData('fees', remainingFees);
 
-                alert('Student, their marks, and fees deleted successfully!');
-                renderManageStudentsPage();
-            }
+                    showModal('Deletion Success', 'Student, their marks, and fees deleted successfully!', 'alert');
+                    renderManageStudentsPage();
+                }
+            });
         };
 
         const renderEnterMarksPage = () => {
@@ -788,7 +911,7 @@
             const teacher = getData('session', {}).username;
 
             if (!selectedClass || !selectedSubject || !selectedTerm || !selectedYear || !selectedExamType) {
-                alert('Please select a class, subject, term, academic year, and exam type.');
+                showModal('Input Error', 'Please select a class, subject, term, academic year, and exam type.', 'alert');
                 return;
             }
 
@@ -826,7 +949,7 @@
             );
 
             setData('marks', [...filteredMarks, ...newMarks]);
-            alert('Marks saved successfully!');
+            showModal('Success', 'Marks saved successfully!', 'alert');
             renderPage();
         };
 
@@ -970,43 +1093,46 @@
                         m.examType === markToEdit.examType
                     );
 
+                    // Using prompt for now as showModal does not support input fields directly
                     const newMark = prompt(`Enter new mark for ${markToEdit.studentName} in ${markToEdit.subject} (${markToEdit.term}, ${markToEdit.year}):`, markToEdit.marks);
                     if (newMark !== null && !isNaN(newMark) && newMark >= 0 && newMark <= 100) {
                         marks[originalIndex].marks = parseInt(newMark, 10);
                         setData('marks', marks);
-                        alert('Mark updated successfully!');
+                        showModal('Success', 'Mark updated successfully!', 'alert');
                         applyFilters(); // Re-render the filtered list
                     } else if (newMark !== null) {
-                        alert('Invalid input. Please enter a number between 0 and 100.');
+                        showModal('Invalid Input', 'Invalid input. Please enter a number between 0 and 100.', 'alert');
                     }
                 };
 
                 window.deleteMark = (index) => {
-                    if (confirm('Are you sure you want to delete this mark?')) {
-                        const filteredMarks = marks.filter(m =>
-                            (filters.class.value === '' || m.class === filters.class.value) &&
-                            (filters.subject.value === '' || m.subject === filters.subject.value) &&
-                            (filters.term.value === '' || m.term === filters.term.value) &&
-                            (filters.year.value === '' || m.year === filters.year.value) &&
-                            (filters.examType.value === '' || m.examType === filters.examType.value)
-                        );
-                        const markToDelete = filteredMarks[index];
+                    showModal('Confirm Deletion', 'Are you sure you want to delete this mark?', 'confirm', (result) => {
+                        if (result) {
+                            const filteredMarks = marks.filter(m =>
+                                (filters.class.value === '' || m.class === filters.class.value) &&
+                                (filters.subject.value === '' || m.subject === filters.subject.value) &&
+                                (filters.term.value === '' || m.term === filters.term.value) &&
+                                (filters.year.value === '' || m.year === filters.year.value) &&
+                                (filters.examType.value === '' || m.examType === filters.examType.value)
+                            );
+                            const markToDelete = filteredMarks[index];
 
-                        const originalIndex = marks.findIndex(m =>
-                            m.studentId === markToDelete.studentId &&
-                            m.subject === markToDelete.subject &&
-                            m.term === markToDelete.term &&
-                            m.year === markToDelete.year &&
-                            m.examType === markToDelete.examType
-                        );
+                            const originalIndex = marks.findIndex(m =>
+                                m.studentId === markToDelete.studentId &&
+                                m.subject === markToDelete.subject &&
+                                m.term === markToDelete.term &&
+                                m.year === markToDelete.year &&
+                                m.examType === markToDelete.examType
+                            );
 
-                        if (originalIndex !== -1) {
-                            marks.splice(originalIndex, 1);
-                            setData('marks', marks);
-                            alert('Mark deleted successfully!');
-                            applyFilters();
+                            if (originalIndex !== -1) {
+                                marks.splice(originalIndex, 1);
+                                setData('marks', marks);
+                                showModal('Deletion Success', 'Mark deleted successfully!', 'alert');
+                                applyFilters();
+                            }
                         }
-                    }
+                    });
                 };
 
                 // Initial render of the table
@@ -1268,7 +1394,7 @@
                 student.awards = document.getElementById('edit-awards').value.split(',').map(a => a.trim()).filter(a => a);
 
                 setData('students', students);
-                alert('Student profile updated successfully!');
+                showModal('Success', 'Student profile updated successfully!', 'alert');
                 closeModal('edit-student-modal');
                 renderManageStudentProfilesPage(); // Refresh the list
             });
@@ -1329,17 +1455,8 @@
                         </div>
                     </aside>
 
-                    <!-- Overlay for mobile sidebar -->
-                    <div id="admin-sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden" onclick="toggleSidebar('admin')"></div>
-
                     <!-- Main Content -->
                     <div class="flex-1 flex flex-col">
-                        <!-- Mobile menu button -->
-                        <button id="admin-menu-btn" class="md:hidden p-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 m-4 self-start">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
                         <main class="flex-1 p-6 bg-white shadow-lg rounded-lg md:rounded-l-none">
                             <div id="admin-content">
                                 <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome, Admin!</h2>
@@ -1395,8 +1512,7 @@
                     </div>
                 </div>
             `;
-            // Attach event listener for mobile menu button
-            document.getElementById('admin-menu-btn').addEventListener('click', () => toggleSidebar('admin'));
+            updateSideMenuContent('admin'); // Update mobile menu for admin
         };
 
         const renderManageTeachersPage = () => {
@@ -1471,30 +1587,32 @@
             const password = document.getElementById('teacher-password').value;
 
             if (!name || !username || !password) {
-                alert('All fields are required.');
+                showModal('Input Error', 'All fields are required.', 'alert');
                 return;
             }
 
             const allTeachers = getData('teachers', []);
             if (allTeachers.some(t => t.username === username)) {
-                alert('A teacher with this username already exists.');
+                showModal('Duplicate Entry', 'A teacher with this username already exists.', 'alert');
                 return;
             }
 
             const newTeacher = { name, username, password };
             setData('teachers', [...allTeachers, newTeacher]);
-            alert('Teacher added successfully!');
+            showModal('Success', 'Teacher added successfully!', 'alert');
             renderManageTeachersPage(); // Re-render the page
         };
 
         window.deleteTeacher = (index) => {
-            if (confirm('Are you sure you want to delete this teacher?')) {
-                const allTeachers = getData('teachers', []);
-                allTeachers.splice(index, 1);
-                setData('teachers', allTeachers);
-                alert('Teacher deleted successfully!');
-                renderManageTeachersPage();
-            }
+            showModal('Confirm Deletion', 'Are you sure you want to delete this teacher?', 'confirm', (result) => {
+                if (result) {
+                    const allTeachers = getData('teachers', []);
+                    allTeachers.splice(index, 1);
+                    setData('teachers', allTeachers);
+                    showModal('Deletion Success', 'Teacher deleted successfully!', 'alert');
+                    renderManageTeachersPage();
+                }
+            });
         };
 
         const renderManageStudentsPage = () => {
@@ -1687,11 +1805,7 @@
 
                     return `
                         <div class="report-container shadow-2xl rounded-lg">
-                            <div class="report-header">
-                                <img src="logo.png" alt="School Logo" class="mx-auto">
-                                <h1 class="font-bold text-white">Prince Alex Academy Report Form</h1>
-                                <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
-                            </div>
+                            ${getReportHeaderHtml()}
                             
                             <div class="p-6">
                                 <h3 class="section-title">Student Information</h3>
@@ -1778,11 +1892,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="report-footer">
-                                <p class="font-bold">Prince Alex Academy</p>
-                                <p class="text-sm">Developed by Prince Alex Digital</p>
-                                <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
-                            </div>
+                            ${getReportFooterHtml()}
                         </div>
                     `;
                 };
@@ -1814,7 +1924,7 @@
                     const selectedStudentId = studentSelect.value;
 
                     if (!selectedClass || !selectedTerm || !selectedYear) {
-                        alert('Please select a class, term, and academic year.');
+                        showModal('Input Error', 'Please select a class, term, and academic year.', 'alert');
                         return;
                     }
 
@@ -1847,14 +1957,14 @@
                     }
 
                     if (studentsToReport.length === 0) {
-                        alert('No students found for the selected criteria.');
+                        showModal('No Data', 'No students found for the selected criteria.', 'alert');
                         return;
                     }
 
                     // Check if marks exist for the selected class, term and year
                     const classMarksForTermAndYear = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm && m.year === selectedYear);
                     if (classMarksForTermAndYear.length === 0) {
-                         alert('No marks found for this class, term, and academic year.');
+                         showModal('No Data', 'No marks found for this class, term, and academic year.', 'alert');
                         return;
                     }
 
@@ -1893,7 +2003,7 @@
                     const selectedTerm = termSelect.value;
                     const selectedYear = yearSelect.value;
                     if (!selectedClass || !selectedTerm || !selectedYear) {
-                        alert('Please generate a report first.');
+                        showModal('Report Error', 'Please generate a report first.', 'alert');
                         return;
                     }
                     html2pdf().from(reportPreview).set({
@@ -1910,7 +2020,7 @@
                     const selectedTerm = termSelect.value;
                     const selectedYear = yearSelect.value;
                     if (!selectedClass || !selectedTerm || !selectedYear) {
-                        alert('Please select a class, term, and academic year.');
+                        showModal('Input Error', 'Please select a class, term, and academic year.', 'alert');
                         return;
                     }
 
@@ -1920,13 +2030,13 @@
                     const totalStudents = studentsToDownload.length;
 
                     if (studentsToDownload.length === 0) {
-                        alert('No students found in this class to download reports for.');
+                        showModal('No Data', 'No students found in this class to download reports for.', 'alert');
                         return;
                     }
                     
                     const classMarksForTermAndYear = allMarks.filter(m => m.class === selectedClass && m.term === selectedTerm && m.year === selectedYear);
                     if (classMarksForTermAndYear.length === 0) {
-                         alert('No marks found for this class, term, and academic year.');
+                         showModal('No Data', 'No marks found for this class, term, and academic year.', 'alert');
                         return;
                     }
 
@@ -1985,7 +2095,7 @@
 
                     downloadIndividualBtn.innerHTML = originalBtnText;
                     downloadIndividualBtn.disabled = false;
-                    alert('All individual reports have been downloaded!');
+                    showModal('Download Complete', 'All individual reports have been downloaded!', 'alert');
                 };
             }
         };
@@ -2024,11 +2134,11 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="amount-due" class="block text-sm font-medium text-gray-700">Amount Due</label>
+                                <label for="amount-due" class="block text-sm font-medium text-gray-700">Amount Due (KSH)</label>
                                 <input type="number" id="amount-due" class="input-field mt-1" min="0" required>
                             </div>
                             <div>
-                                <label for="amount-paid" class="block text-sm font-medium text-gray-700">Amount Paid</label>
+                                <label for="amount-paid" class="block text-sm font-medium text-gray-700">Amount Paid (KSH)</label>
                                 <input type="number" id="amount-paid" class="input-field mt-1" min="0" required>
                             </div>
                             <button type="submit" class="btn-primary">Record Payment</button>
@@ -2065,9 +2175,9 @@
                                             <td class="px-6 py-4 whitespace-nowrap">${student ? student.name : 'Unknown'}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">${f.term}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">${f.year}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">$${f.amountDue.toLocaleString()}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">$${f.amountPaid.toLocaleString()}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">$${balance.toLocaleString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">KSH ${f.amountDue.toLocaleString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">KSH ${f.amountPaid.toLocaleString()}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">KSH ${balance.toLocaleString()}</td>
                                             <td class="px-6 py-4 whitespace-nowrap ${statusColor}">${f.status}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">${f.date || '-'}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -2098,12 +2208,12 @@
             const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
             if (!studentId || !term || !year || isNaN(amountDue) || isNaN(amountPaid)) {
-                alert('Please fill in all payment details with valid numbers.');
+                showModal('Input Error', 'Please fill in all payment details with valid numbers.', 'alert');
                 return;
             }
 
             if (amountPaid > amountDue) {
-                alert('Amount paid cannot exceed amount due.');
+                showModal('Payment Error', 'Amount paid cannot exceed amount due.', 'alert');
                 return;
             }
 
@@ -2127,7 +2237,7 @@
             }
             
             setData('fees', allFees);
-            alert('Payment recorded successfully!');
+            showModal('Success', 'Payment recorded successfully!', 'alert');
             renderFeeTrackingPage(); // Refresh the page
         };
 
@@ -2137,7 +2247,8 @@
             const students = getData('students', []);
             const student = students.find(s => s.id === feeRecord.studentId);
 
-            const newAmountPaid = prompt(`Enter new amount paid for ${student.name} (${feeRecord.term}, ${feeRecord.year}). Current paid: $${feeRecord.amountPaid.toLocaleString()}:`, feeRecord.amountPaid);
+            // Using prompt for now as showModal does not support input fields directly
+            const newAmountPaid = prompt(`Enter new amount paid for ${student.name} (${feeRecord.term}, ${feeRecord.year}). Current paid: KSH ${feeRecord.amountPaid.toLocaleString()}:`, feeRecord.amountPaid);
             
             if (newAmountPaid !== null && !isNaN(newAmountPaid) && parseFloat(newAmountPaid) >= 0) {
                 const updatedAmountPaid = parseFloat(newAmountPaid);
@@ -2153,21 +2264,23 @@
                 feeRecord.date = new Date().toISOString().slice(0, 10); // Update date on edit
 
                 setData('fees', allFees);
-                alert('Fee record updated successfully!');
+                showModal('Success', 'Fee record updated successfully!', 'alert');
                 renderFeeTrackingPage();
             } else if (newAmountPaid !== null) {
-                alert('Invalid input. Please enter a valid non-negative number.');
+                showModal('Invalid Input', 'Invalid input. Please enter a valid non-negative number.', 'alert');
             }
         };
 
         window.deleteFeeRecord = (index) => {
-            if (confirm('Are you sure you want to delete this fee record?')) {
-                let allFees = getData('fees', []);
-                allFees.splice(index, 1);
-                setData('fees', allFees);
-                alert('Fee record deleted successfully!');
-                renderFeeTrackingPage();
-            }
+            showModal('Confirm Deletion', 'Are you sure you want to delete this fee record?', 'confirm', (result) => {
+                if (result) {
+                    let allFees = getData('fees', []);
+                    allFees.splice(index, 1);
+                    setData('fees', allFees);
+                    showModal('Deletion Success', 'Fee record deleted successfully!', 'alert');
+                    renderFeeTrackingPage();
+                }
+            });
         };
 
         const renderFileUploadPage = () => {
@@ -2226,7 +2339,7 @@
                     const file = fileInput.files[0];
 
                     if (!file || !fileDescription) {
-                        alert('Please select a file and provide a description.');
+                        showModal('File Error', 'Please select a file and provide a description.', 'alert');
                         return;
                     }
 
@@ -2238,131 +2351,190 @@
 
                     const currentFiles = getData('files', []);
                     setData('files', [...currentFiles, newFileRecord]);
-                    alert('File record "uploaded" successfully (mock)!');
+                    showModal('Upload Success', 'File record "uploaded" successfully (mock)!', 'alert');
                     renderFileUploadPage();
                 });
 
                 window.deleteMockFile = (index) => {
-                    if (confirm('Are you sure you want to delete this file record?')) {
-                        let currentFiles = getData('files', []);
-                        currentFiles.splice(index, 1);
-                        setData('files', currentFiles);
-                        alert('File record deleted!');
-                        renderFileUploadPage();
-                    }
+                    showModal('Confirm Deletion', 'Are you sure you want to delete this file record?', 'confirm', (result) => {
+                        if (result) {
+                            let currentFiles = getData('files', []);
+                            currentFiles.splice(index, 1);
+                            setData('files', currentFiles);
+                            showModal('Deletion Success', 'File record deleted!', 'alert');
+                            renderFileUploadPage();
+                        }
+                    });
                 };
             }
         };
+
+        // Reusable Header HTML for PDF Reports
+        const getReportHeaderHtml = () => {
+            return `
+                <div class="report-header">
+                    <img src="logo.png" alt="School Logo" class="mx-auto">
+                    <h1 class="font-bold text-white">Prince Alex Academy Report Form</h1>
+                    <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
+                </div>
+            `;
+        };
+
+        // Reusable Footer HTML for PDF Reports
+        const getReportFooterHtml = () => {
+            return `
+                <div class="report-footer">
+                    <p class="font-bold">Prince Alex Academy</p>
+                    <p class="text-sm">Developed by Prince Alex Digital</p>
+                    <p class="text-sm">Email: princealexdigital@gmail.com | Contact: 0717384875</p>
+                </div>
+            `;
+        };
+
 
         const renderExportDataPage = () => {
             const contentDiv = document.getElementById('admin-content');
             if (contentDiv) {
                 contentDiv.innerHTML = `
-                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Export Data</h2>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Export Data (PDF)</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="card bg-blue-50">
                             <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Students</h3>
-                            <p class="text-gray-600">Download all student records as a CSV file.</p>
-                            <button onclick="exportStudentsCsv()" class="btn-primary mt-4">Export Students CSV</button>
+                            <p class="text-gray-600">Download all student records as a PDF file.</p>
+                            <button onclick="exportStudentsPdf()" class="btn-primary mt-4">Export Students PDF</button>
                         </div>
                         <div class="card bg-blue-50">
                             <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Grades</h3>
-                            <p class="text-gray-600">Download all student marks as a CSV file.</p>
-                            <button onclick="exportGradesCsv()" class="btn-primary mt-4">Export Grades CSV</button>
+                            <p class="text-gray-600">Download all student marks as a PDF file.</p>
+                            <button onclick="exportGradesPdf()" class="btn-primary mt-4">Export Grades PDF</button>
                         </div>
                         <div class="card bg-blue-50">
                             <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Report Summaries</h3>
-                            <p class="text-gray-600">Download summaries of all generated reports as a CSV file.</p>
-                            <button onclick="exportReportSummariesCsv()" class="btn-primary mt-4">Export Report Summaries CSV</button>
+                            <p class="text-gray-600">Download summaries of all generated reports as a PDF file.</p>
+                            <button onclick="exportReportSummariesPdf()" class="btn-primary mt-4">Export Report Summaries PDF</button>
                         </div>
                         <div class="card bg-blue-50">
                             <h3 class="text-2xl font-semibold text-blue-600 mb-2">Export Fee Records</h3>
-                            <p class="text-gray-600">Download all fee payment records as a CSV file.</p>
-                            <button onclick="exportFeesCsv()" class="btn-primary mt-4">Export Fee Records CSV</button>
+                            <p class="text-gray-600">Download all fee payment records as a PDF file.</p>
+                            <button onclick="exportFeesPdf()" class="btn-primary mt-4">Export Fee Records PDF</button>
                         </div>
                     </div>
                 `;
             }
         };
 
-        const downloadCsv = (filename, data) => {
-            const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) { // feature detection
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                alert(`${filename} downloaded successfully!`);
-            } else {
-                alert('Your browser does not support downloading files directly. Please copy the data manually.');
-            }
+        // Generic PDF export function with header/footer
+        const downloadPdfWithHeaderFooter = async (filename, contentHtml) => {
+            const tempElement = document.createElement('div');
+            tempElement.innerHTML = `
+                <div class="report-container">
+                    ${getReportHeaderHtml()}
+                    <div style="padding: 2rem;">
+                        ${contentHtml}
+                    </div>
+                    ${getReportFooterHtml()}
+                </div>
+            `;
+            document.body.appendChild(tempElement); // Append to body to render styles correctly
+
+            await html2pdf().from(tempElement).set({
+                margin: [10, 10, 10, 10],
+                filename: filename,
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).save();
+
+            document.body.removeChild(tempElement); // Remove after download
+            showModal('Download Complete', `${filename} downloaded successfully!`, 'alert');
         };
 
-        window.exportStudentsCsv = () => {
+        window.exportStudentsPdf = async () => {
             const students = getData('students', []);
             if (students.length === 0) {
-                alert('No student data to export.');
+                showModal('No Data', 'No student data to export.', 'alert');
                 return;
             }
-            const headers = ['Admission No.', 'Student Name', 'Class', 'Gender', 'Date of Birth (YYYY-MM-DD)', 'Parent/Guardian Name', 'Parent/Guardian Contact', 'Behavior Notes', 'Awards'];
-            const csvRows = [
-                headers.join(','),
-                ...students.map(s => [
-                    s.id,
-                    s.name,
-                    s.class,
-                    s.gender,
-                    s.dob || '',
-                    s.parentName || '',
-                    s.parentContact || '',
-                    `"${s.behaviorNotes ? s.behaviorNotes.replace(/"/g, '""') : ''}"`, // Enclose notes in quotes
-                    `"${s.awards && s.awards.length > 0 ? s.awards.join('; ').replace(/"/g, '""') : ''}"` // Enclose awards in quotes
-                ].join(','))
-            ];
-            downloadCsv('students.csv', csvRows.join('\n'));
+            let tableHtml = `
+                <h3 class="section-title">Student List</h3>
+                <table class="report-table w-full mt-4">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2">Adm No.</th>
+                            <th class="p-2">Student Name</th>
+                            <th class="p-2">Class</th>
+                            <th class="p-2">Gender</th>
+                            <th class="p-2">DOB</th>
+                            <th class="p-2">Parent Name</th>
+                            <th class="p-2">Parent Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${students.map(s => `
+                            <tr class="border-b">
+                                <td class="p-2">${s.id}</td>
+                                <td class="p-2">${s.name}</td>
+                                <td class="p-2">${s.class}</td>
+                                <td class="p-2">${s.gender}</td>
+                                <td class="p-2">${s.dob || '-'}</td>
+                                <td class="p-2">${s.parentName || '-'}</td>
+                                <td class="p-2">${s.parentContact || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            await downloadPdfWithHeaderFooter('students_list.pdf', tableHtml);
         };
 
-        window.exportGradesCsv = () => {
+        window.exportGradesPdf = async () => {
             const marks = getData('marks', []);
             if (marks.length === 0) {
-                alert('No grades data to export.');
+                showModal('No Data', 'No grades data to export.', 'alert');
                 return;
             }
-            const headers = ['Student ID', 'Student Name', 'Class', 'Subject', 'Term', 'Year', 'Exam Type', 'Marks', 'Teacher'];
-            const csvRows = [
-                headers.join(','),
-                ...marks.map(m => [
-                    m.studentId,
-                    m.studentName,
-                    m.class,
-                    m.subject,
-                    m.term,
-                    m.year,
-                    m.examType,
-                    m.marks,
-                    m.teacher
-                ].join(','))
-            ];
-            downloadCsv('grades.csv', csvRows.join('\n'));
+            let tableHtml = `
+                <h3 class="section-title">All Grades</h3>
+                <table class="report-table w-full mt-4">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2">Student Name</th>
+                            <th class="p-2">Class</th>
+                            <th class="p-2">Subject</th>
+                            <th class="p-2">Term</th>
+                            <th class="p-2">Year</th>
+                            <th class="p-2">Exam Type</th>
+                            <th class="p-2">Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${marks.map(m => `
+                            <tr class="border-b">
+                                <td class="p-2">${m.studentName}</td>
+                                <td class="p-2">${m.class}</td>
+                                <td class="p-2">${m.subject}</td>
+                                <td class="p-2">${m.term}</td>
+                                <td class="p-2">${m.year}</td>
+                                <td class="p-2">${m.examType}</td>
+                                <td class="p-2">${m.marks}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            await downloadPdfWithHeaderFooter('grades_list.pdf', tableHtml);
         };
 
-        window.exportReportSummariesCsv = () => {
+        window.exportReportSummariesPdf = async () => {
             const students = getData('students', []);
             const marks = getData('marks', []);
             const terms = ['Term 1', 'Term 2', 'Term 3'];
             
             if (students.length === 0 || marks.length === 0) {
-                alert('Not enough data to export report summaries. Ensure students and marks exist.');
+                showModal('No Data', 'Not enough data to export report summaries. Ensure students and marks exist.', 'alert');
                 return;
             }
 
-            const headers = ['Student ID', 'Student Name', 'Class', 'Academic Year', 'Term 1 Average', 'Term 2 Average', 'Term 3 Average', 'Annual Average'];
-            const csvRows = [headers.join(',')];
-
+            let tableRowsHtml = '';
             students.forEach(student => {
                 academicYears.forEach(year => {
                     const studentTermAverages = {};
@@ -2379,50 +2551,242 @@
                     });
                     const annualAverage = termsWithMarks > 0 ? (totalAnnualMarks / termsWithMarks).toFixed(2) : '-';
 
-                    csvRows.push([
-                        student.id,
-                        student.name,
-                        student.class,
-                        year,
-                        studentTermAverages['Term 1 Average'],
-                        studentTermAverages['Term 2 Average'],
-                        studentTermAverages['Term 3 Average'],
-                        annualAverage
-                    ].join(','));
+                    tableRowsHtml += `
+                        <tr class="border-b">
+                            <td class="p-2">${student.id}</td>
+                            <td class="p-2">${student.name}</td>
+                            <td class="p-2">${student.class}</td>
+                            <td class="p-2">${year}</td>
+                            <td class="p-2">${studentTermAverages['Term 1 Average']}</td>
+                            <td class="p-2">${studentTermAverages['Term 2 Average']}</td>
+                            <td class="p-2">${studentTermAverages['Term 3 Average']}</td>
+                            <td class="p-2">${annualAverage}</td>
+                        </tr>
+                    `;
                 });
             });
-            downloadCsv('report_summaries.csv', csvRows.join('\n'));
+
+            let tableHtml = `
+                <h3 class="section-title">Report Summaries</h3>
+                <table class="report-table w-full mt-4">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2">Student ID</th>
+                            <th class="p-2">Student Name</th>
+                            <th class="p-2">Class</th>
+                            <th class="p-2">Academic Year</th>
+                            <th class="p-2">Term 1 Avg</th>
+                            <th class="p-2">Term 2 Avg</th>
+                            <th class="p-2">Term 3 Avg</th>
+                            <th class="p-2">Annual Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRowsHtml}
+                    </tbody>
+                </table>
+            `;
+            await downloadPdfWithHeaderFooter('report_summaries.pdf', tableHtml);
         };
 
-        window.exportFeesCsv = () => {
+        window.exportFeesPdf = async () => {
             const fees = getData('fees', []);
             const students = getData('students', []);
             if (fees.length === 0) {
-                alert('No fee records to export.');
+                showModal('No Data', 'No fee records to export.', 'alert');
                 return;
             }
 
-            const headers = ['Student ID', 'Student Name', 'Term', 'Year', 'Amount Due', 'Amount Paid', 'Balance', 'Status', 'Date'];
-            const csvRows = [
-                headers.join(','),
-                ...fees.map(f => {
-                    const student = students.find(s => s.id === f.studentId);
-                    const studentName = student ? student.name : 'Unknown';
-                    const balance = f.amountDue - f.amountPaid;
-                    return [
-                        f.studentId,
-                        studentName,
-                        f.term,
-                        f.year,
-                        f.amountDue,
-                        f.amountPaid,
-                        balance,
-                        f.status,
-                        f.date || ''
-                    ].join(',');
-                })
-            ];
-            downloadCsv('fee_records.csv', csvRows.join('\n'));
+            let tableHtml = `
+                <h3 class="section-title">Fee Records</h3>
+                <table class="report-table w-full mt-4">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2">Student Name</th>
+                            <th class="p-2">Term</th>
+                            <th class="p-2">Year</th>
+                            <th class="p-2">Amount Due</th>
+                            <th class="p-2">Amount Paid</th>
+                            <th class="p-2">Balance</th>
+                            <th class="p-2">Status</th>
+                            <th class="p-2">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${fees.map(f => {
+                            const student = students.find(s => s.id === f.studentId);
+                            const studentName = student ? student.name : 'Unknown';
+                            const balance = f.amountDue - f.amountPaid;
+                            return `
+                                <tr class="border-b">
+                                    <td class="p-2">${studentName}</td>
+                                    <td class="p-2">${f.term}</td>
+                                    <td class="p-2">${f.year}</td>
+                                    <td class="p-2">KSH ${f.amountDue.toLocaleString()}</td>
+                                    <td class="p-2">KSH ${f.amountPaid.toLocaleString()}</td>
+                                    <td class="p-2">KSH ${balance.toLocaleString()}</td>
+                                    <td class="p-2">${f.status}</td>
+                                    <td class="p-2">${f.date || '-'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            await downloadPdfWithHeaderFooter('fee_records.pdf', tableHtml);
+        };
+
+        const renderTeacherFeeTrackingPage = () => {
+            const students = getData('students', []);
+            const fees = getData('fees', []);
+            const contentDiv = document.getElementById('teacher-content');
+
+            if (contentDiv) {
+                contentDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Student Fee Tracking</h2>
+                    <div class="mb-4">
+                        <label for="fee-year-filter-teacher" class="block text-sm font-medium text-gray-700">Select Academic Year</label>
+                        <select id="fee-year-filter-teacher" class="input-field mt-1">
+                            <option value="">All Years</option>
+                            ${academicYears.map(y => `<option value="${y}" ${y === currentYear.toString() ? 'selected' : ''}>${y}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="marks-list-container mt-6">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Due</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Paid</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Overall Balance</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacher-fee-summary-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Rows will be populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                const teacherFeeSummaryTableBody = document.getElementById('teacher-fee-summary-table-body');
+                const feeYearFilterTeacher = document.getElementById('fee-year-filter-teacher');
+
+                const updateTeacherFeeSummary = () => {
+                    const selectedYear = feeYearFilterTeacher.value;
+                    let filteredStudents = students.map(student => {
+                        const studentFees = selectedYear
+                            ? fees.filter(f => f.studentId === student.id && f.year === selectedYear)
+                            : fees.filter(f => f.studentId === student.id);
+                        
+                        const totalDue = studentFees.reduce((sum, f) => sum + f.amountDue, 0);
+                        const totalPaid = studentFees.reduce((sum, f) => sum + f.amountPaid, 0);
+                        const overallBalance = totalDue - totalPaid;
+                        return { ...student, totalDue, totalPaid, overallBalance, hasFeeRecords: studentFees.length > 0 };
+                    }).filter(s => s.hasFeeRecords || selectedYear === ''); // Only show students with fee records for a selected year, or all if no year selected
+
+                    teacherFeeSummaryTableBody.innerHTML = filteredStudents.map(s => `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">${s.name}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${s.class}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">KSH ${s.totalDue.toLocaleString()}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">KSH ${s.totalPaid.toLocaleString()}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">KSH ${s.overallBalance.toLocaleString()}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button onclick="generateStudentFeeStatementPdf('${s.id}', '${selectedYear}')" class="text-blue-600 hover:text-blue-900 font-semibold">Print Statement</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                };
+
+                feeYearFilterTeacher.addEventListener('change', updateTeacherFeeSummary);
+                updateTeacherFeeSummary(); // Initial load
+            }
+        };
+
+        window.generateStudentFeeStatementPdf = async (studentId, selectedYear) => {
+            const student = getData('students', []).find(s => s.id === studentId);
+            if (!student) {
+                showModal('Error', 'Student not found.', 'alert');
+                return;
+            }
+
+            const studentFees = getData('fees', []).filter(f => f.studentId === studentId && (selectedYear === '' || f.year === selectedYear));
+
+            if (studentFees.length === 0) {
+                showModal('No Data', `No fee records found for ${student.name} for the selected year.`, 'alert');
+                return;
+            }
+
+            let totalDue = 0;
+            let totalPaid = 0;
+            
+            let feeRowsHtml = studentFees.map(f => {
+                const balance = f.amountDue - f.amountPaid;
+                totalDue += f.amountDue;
+                totalPaid += f.amountPaid;
+                return `
+                    <tr class="border-b">
+                        <td class="p-2">${f.term}</td>
+                        <td class="p-2">${f.year}</td>
+                        <td class="p-2">KSH ${f.amountDue.toLocaleString()}</td>
+                        <td class="p-2">KSH ${f.amountPaid.toLocaleString()}</td>
+                        <td class="p-2">KSH ${balance.toLocaleString()}</td>
+                        <td class="p-2">${f.status}</td>
+                        <td class="p-2">${f.date || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const overallBalance = totalDue - totalPaid;
+            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const contentHtml = `
+                <h3 class="section-title">Fee Statement for ${student.name} (${selectedYear || 'All Years'})</h3>
+                <div class="grid grid-cols-2 gap-y-2 mb-6">
+                    <p><strong>Student Name:</strong> ${student.name}</p>
+                    <p><strong>Admission No:</strong> ${student.id}</p>
+                    <p><strong>Class:</strong> ${student.class}</p>
+                    <p><strong>Date Generated:</strong> ${today}</p>
+                </div>
+
+                <h4 class="font-semibold text-lg mb-2">Payment Details:</h4>
+                <table class="report-table w-full mt-4">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2">Term</th>
+                            <th class="p-2">Year</th>
+                            <th class="p-2">Amount Due</th>
+                            <th class="p-2">Amount Paid</th>
+                            <th class="p-2">Balance</th>
+                            <th class="p-2">Status</th>
+                            <th class="p-2">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${feeRowsHtml}
+                    </tbody>
+                </table>
+
+                <div class="mt-6 text-right">
+                    <p class="font-bold text-lg">Total Amount Due: KSH ${totalDue.toLocaleString()}</p>
+                    <p class="font-bold text-lg">Total Amount Paid: KSH ${totalPaid.toLocaleString()}</p>
+                    <p class="font-bold text-xl text-red-600">Overall Balance: KSH ${overallBalance.toLocaleString()}</p>
+                </div>
+
+                <div class="mt-12 flex justify-between items-end">
+                    <div class="text-center">
+                        <div class="signature-line"></div>
+                        <p class="mt-2 text-sm text-gray-600">Parent/Guardian Signature</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="signature-line"></div>
+                        <p class="mt-2 text-sm text-gray-600">Teacher Signature</p>
+                    </div>
+                </div>
+            `;
+            await downloadPdfWithHeaderFooter(`Fee_Statement_${student.name.replace(/\s/g, '_')}_${selectedYear || 'All_Years'}.pdf`, contentHtml);
         };
 
 
